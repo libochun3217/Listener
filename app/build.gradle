@@ -20,9 +20,19 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            storeFile file("listener.jks")
+            storePassword "892160"
+            keyAlias "listener"
+            keyPassword "892160"
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            signingConfig signingConfigs.release
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
