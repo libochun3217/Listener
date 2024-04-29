@@ -25,7 +25,8 @@ object UserService {
         }
     }
 
-    fun uploadMessage(token: String, messageList: List<String>) {
-
+    fun uploadMessage(token: String, messageList: String) {
+        ServerApi.instance.messageUpload(AddMessageRequest(messageList), token).req {
+        }
     }
 }

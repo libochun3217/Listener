@@ -16,6 +16,6 @@ interface ServerApi {
 
 
     // 直播记录上报接口
-    @POST("/admin/live/addRecords")
-    fun messageUpload(@Body request: LiveRecordRequest, @Header("Authorization") token: String): Call<ResponseResult<String>>
+    @POST("/admin/message")
+    fun messageUpload(@Body request: AddMessageRequest, @Header("Authorization") token: String): Call<ResponseResult<String>>
 }

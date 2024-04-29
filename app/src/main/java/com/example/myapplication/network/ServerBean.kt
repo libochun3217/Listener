@@ -27,6 +27,10 @@ data class LiveRecordRequest(
     val records: List<LiveRecord>
 ) : Serializable
 
+data class AddMessageRequest(
+    val liveMessage: String
+) : Serializable
+
 data class LiveRecord(
     val channelName: String,
     val isPass: Boolean,
