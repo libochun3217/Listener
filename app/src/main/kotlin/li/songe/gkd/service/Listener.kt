@@ -42,7 +42,7 @@ object Listener {
     private fun uploadMessage() {
         uploading = true
         var liveMessage = ""
-        messageList.map { liveMessage = "$it\n$liveMessage" }
+        messageList.map { liveMessage = "$liveMessage\n$it" }
         messageList.clear()
         uploading = false
         UserService.login {

