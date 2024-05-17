@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:accessibilityEventTypes="typeWindowContentChanged|typeWindowStateChanged"
     android:accessibilityFeedbackType="feedbackAllMask"
+    android:accessibilityFlags="flagIncludeNotImportantViews"
     android:canPerformGestures="true"
     android:canRetrieveWindowContent="true"
     android:canTakeScreenshot="true"
