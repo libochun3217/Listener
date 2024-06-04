@@ -43,7 +43,7 @@ private inline fun <reified T> createStorageFlow(
 data class Store(
     val enableService: Boolean = true,
     val enableStatusService: Boolean = true,
-    val excludeFromRecents: Boolean = false,
+    val excludeFromRecents: Boolean = true,
     val captureScreenshot: Boolean = false,
     val httpServerPort: Int = 8888,
     val updateSubsInterval: Long = UpdateTimeOption.Everyday.value,

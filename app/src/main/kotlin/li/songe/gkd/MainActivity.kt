@@ -1,7 +1,9 @@
 package li.songe.gkd
 
 import android.app.ActivityManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.CompositionLocalProvider
@@ -42,11 +44,9 @@ class MainActivity : CompositionActivity({
     val requestPermissionLauncher = RequestPermissionLauncher(this)
 
     lifecycleScope.launch {
-        storeFlow.map(lifecycleScope) { s -> s.excludeFromRecents }.collect {
-            (app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).let { manager ->
-                manager.appTasks.forEach { task ->
-                    task?.setExcludeFromRecents(it)
-                }
+        (app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).let { manager ->
+            manager.appTasks.forEach { task ->
+                task?.setExcludeFromRecents(true)
             }
         }
     }
@@ -92,6 +92,9 @@ class MainActivity : CompositionActivity({
                 initOrResetAppInfoCache()
             }
         }
+
+        val c = ComponentName(this, MainActivity::class.java)
+        packageManager.setComponentEnabledSetting(c, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
     }
 
     override fun onStop() {
