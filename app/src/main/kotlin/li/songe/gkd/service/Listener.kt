@@ -13,7 +13,7 @@ object Listener {
     private val messageList = ArrayList<String>()
     private val allMessageList = ArrayList<String>()
     private val sleepDefault = 5 * 1000
-    private val friendSleep = 1000 * 10 * 10
+    private val friendSleep = 1000 * 10 * 2
     private var sleep = sleepDefault
     private var uploading = false
 
