@@ -49,22 +49,21 @@
             https://developer.android.com/guide/topics/manifest/activity-element.html#config
             -->
 
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+        </activity>
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="import"
-                    android:scheme="gkd" />
-
-            </intent-filter>
+        <activity-alias
+            android:name=".AliasMainActivity"
+            android:configChanges="keyboard|orientation|screenSize"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_launcher_background"
+            android:launchMode="singleTask"
+            android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
 
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
