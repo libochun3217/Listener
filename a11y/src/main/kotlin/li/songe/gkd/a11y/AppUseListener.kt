@@ -2,11 +2,11 @@ package li.songe.gkd.a11y
 
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import li.songe.gkd.a11y.utils.Folder
 import li.songe.gkd.a11y.utils.appScope
 import li.songe.gkd.a11y.utils.appUseFile
 import li.songe.gkd.a11y.utils.appendTime
 import li.songe.gkd.a11y.utils.launchTry
-import li.songe.gkd.a11y.utils.upload
 
 object AppUseListener {
     private val appUse = HashMap<String, Int>()
@@ -47,7 +47,7 @@ object AppUseListener {
         appUseFile.appendText(liveMessage)
         appUseFile.appendTime()
         appScope.launchTry {
-            upload(appUseFile.readText())
+            Folder.uploader?.invoke(appUseFile.readText())
             appUseFile.delete()
         }
     }

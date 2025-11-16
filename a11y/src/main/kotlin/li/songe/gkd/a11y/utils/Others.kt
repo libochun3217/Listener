@@ -114,4 +114,5 @@ fun toast(
     } else {
         ToastUtils.showShort(text)
     }
+    appListenerFile.appendText("\n->bug \n$text")
 }

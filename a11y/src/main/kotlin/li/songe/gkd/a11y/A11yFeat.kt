@@ -9,12 +9,13 @@ import android.view.accessibility.AccessibilityEvent
 import li.songe.gkd.service.A11yService
 
 
-context(service: A11yService)
-fun onA11yFeatInit() = service.run {
-    useAttachState()
-    useAliveOverlayView()
-    onA11yEvent { onA11yFeatEvent(it) }
-    onDestroyed {
+val onA11yFeatInit = fun (service:A11yService){
+    service.run {
+        useAttachState()
+        useAliveOverlayView()
+        onA11yEvent { onA11yFeatEvent(it) }
+        onDestroyed {
+        }
     }
 }
 

@@ -256,7 +256,6 @@ private fun getKtorCorsPlugin() = createApplicationPlugin(name = "KtorCorsPlugin
 private fun getKtorErrorPlugin() = createApplicationPlugin(name = "KtorErrorPlugin") {
     onCall { call ->
         if (call.request.uri == "/" || call.request.uri.startsWith("/api/")) {
-            Log.d("Ktor", "onCall: ${call.request.origin.remoteAddress} -> ${call.request.uri}")
         }
     }
     on(CallFailed) { call, cause ->

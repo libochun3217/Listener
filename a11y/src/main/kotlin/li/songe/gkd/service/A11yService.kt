@@ -100,7 +100,7 @@ abstract class A11yService : AccessibilityService(), OnA11yLife {
             )
         }
         onDestroyed { unregisterReceiver(screenStateReceiver) }
-        onA11yFeatInit()
+        onA11yFeatInit.invoke(this)
     }
 
     companion object {
