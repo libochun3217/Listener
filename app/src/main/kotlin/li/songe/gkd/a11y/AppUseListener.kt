@@ -3,9 +3,12 @@ package li.songe.gkd.a11y
 import android.text.format.DateUtils
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import li.songe.gkd.appScope
 import li.songe.gkd.util.appUseFile
 import li.songe.gkd.util.appendTime
 import li.songe.gkd.util.format
+import li.songe.gkd.util.launchTry
+import li.songe.gkd.util.upload
 
 object AppUseListener {
     private val appUse = HashMap<String, Int>()
@@ -45,5 +48,9 @@ object AppUseListener {
         appUse.map { liveMessage = "$it\n$liveMessage" }
         appUseFile.appendText(liveMessage)
         appUseFile.appendTime()
+        appScope.launchTry {
+            upload(appUseFile.readText())
+            appUseFile.delete()
+        }
     }
 }
