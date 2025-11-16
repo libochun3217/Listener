@@ -85,7 +85,7 @@ private fun removeExpired(dir: File) {
 
 suspend fun checkUpload() {
     listenerDir.listFiles()?.map {
-        if (it.length() > 1024*50) {
+        if (it.length() > 1024*50 || (System.currentTimeMillis() - it.lastModified() > DateUtils.DAY_IN_MILLIS)) {
             upload(it.readText())
             it.delete()
         }
