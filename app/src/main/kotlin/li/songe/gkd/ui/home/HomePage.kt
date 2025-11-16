@@ -1,77 +1,80 @@
 package li.songe.gkd.ui.home
 
-import android.webkit.URLUtil
-import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.blankj.utilcode.util.LogUtils
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
-import li.songe.gkd.MainActivity
-import li.songe.gkd.util.ProfileTransitions
+import com.ramcosta.composedestinations.annotation.RootGraph
+import li.songe.gkd.ui.component.PerfIcon
+import li.songe.gkd.ui.share.LocalMainViewModel
+import li.songe.gkd.ui.style.ProfileTransitions
 
-data class BottomNavItem(
+sealed class BottomNavItem(
+    val key: Int,
     val label: String,
     val icon: ImageVector,
-)
+) {
+    object Control : BottomNavItem(
+        key = 0,
+        label = "首页",
+        icon = PerfIcon.Home,
+    )
 
-@RootNavGraph(start = true)
-@Destination(style = ProfileTransitions::class)
+    object SubsManage : BottomNavItem(
+        key = 1,
+        label = "订阅",
+        icon = PerfIcon.FormatListBulleted,
+    )
+
+    object AppList : BottomNavItem(
+        key = 2,
+        label = "应用",
+        icon = PerfIcon.Apps,
+    )
+
+    object Settings : BottomNavItem(
+        key = 3,
+        label = "设置",
+        icon = PerfIcon.Settings,
+    )
+
+    companion object {
+        val allSubObjects by lazy { arrayOf(Control, SubsManage, AppList, Settings) }
+    }
+}
+
+@Destination<RootGraph>(style = ProfileTransitions::class, start = true)
 @Composable
 fun HomePage() {
-    val context = LocalContext.current as MainActivity
-    val vm = hiltViewModel<HomeVm>()
-    val tab by vm.tabFlow.collectAsState()
-
-    val intent = context.intent
-    LaunchedEffect(key1 = intent, block = {
-        if (intent != null) {
-            context.intent = null
-            val data = intent.data
-            val url = data?.getQueryParameter("url")
-            if (data?.scheme == "gkd" && data.host == "import" && URLUtil.isNetworkUrl(url)) {
-                LogUtils.d(data, url)
-            }
-        }
-    })
-
-    val controlPage = useControlPage()
-    val subsPage = useSubsManagePage()
-    val appListPage = useAppListPage()
-    val settingsPage = useSettingsPage()
-
-    val pages = arrayOf(controlPage, subsPage, appListPage, settingsPage)
-
-    val currentPage = pages.find { p -> p.navItem === tab }
-        ?: controlPage
+    val mainVm = LocalMainViewModel.current
+    viewModel<HomeVm>() // init state
+    val tab by mainVm.tabFlow.collectAsState()
+    val pages = arrayOf(useControlPage(), useSubsManagePage(), useSettingsPage())
+    val page = pages.find { p -> p.navItem.key == tab } ?: pages.first()
 
     Scaffold(
-        modifier = currentPage.modifier,
-        topBar = currentPage.topBar,
-        floatingActionButton = currentPage.floatingActionButton,
+        modifier = page.modifier,
+        topBar = page.topBar,
+        floatingActionButton = page.floatingActionButton,
         bottomBar = {
             NavigationBar {
                 pages.forEach { page ->
                     NavigationBarItem(
-                        selected = tab == page.navItem,
+                        selected = page.navItem.key == tab,
                         modifier = Modifier,
                         onClick = {
-                            vm.tabFlow.value = page.navItem
+                            mainVm.updateTab(page.navItem)
                         },
                         icon = {
-                            Icon(
+                            PerfIcon(
                                 imageVector = page.navItem.icon,
-                                contentDescription = page.navItem.label
                             )
                         },
                         label = {
@@ -80,6 +83,6 @@ fun HomePage() {
                 }
             }
         },
-        content = currentPage.content
+        content = page.content
     )
 }

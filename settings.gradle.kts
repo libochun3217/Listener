@@ -1,25 +1,33 @@
 rootProject.name = "gkd"
-include(":app")
-include(":selector")
-include(":hidden_api")
-include(":wasm_matches")
+include(
+    ":app",
+)
 
 pluginManagement {
     repositories {
-        mavenLocal()
         mavenCentral()
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         maven("https://jitpack.io")
-        maven("https://plugins.gradle.org/m2/")
+        gradlePluginPortal()
     }
 }
 
 dependencyResolutionManagement {
     repositories {
-        mavenLocal()
         mavenCentral()
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         maven("https://jitpack.io")
     }
 }
-

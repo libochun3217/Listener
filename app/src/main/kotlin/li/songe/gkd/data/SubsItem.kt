@@ -11,10 +11,11 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
-import li.songe.gkd.db.DbSet
-import li.songe.gkd.util.deleteSubscription
-import li.songe.gkd.util.isSafeUrl
+import kotlinx.serialization.Serializable
+import li.songe.gkd.util.LOCAL_SUBS_IDS
+import li.songe.gkd.util.format
 
+@Serializable
 @Entity(
     tableName = "subs_item",
 )
@@ -23,28 +24,17 @@ data class SubsItem(
 
     @ColumnInfo(name = "ctime") val ctime: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "mtime") val mtime: Long = System.currentTimeMillis(),
-    @ColumnInfo(name = "enable") val enable: Boolean = true,
+    @ColumnInfo(name = "enable") val enable: Boolean = false,
     @ColumnInfo(name = "enable_update") val enableUpdate: Boolean = true,
     @ColumnInfo(name = "order") val order: Int,
     @ColumnInfo(name = "update_url") val updateUrl: String? = null,
 
     ) {
 
-    val isSafeRemote by lazy {
-        if (updateUrl != null) {
-            isSafeUrl(updateUrl)
-        } else {
-            false
-        }
-    }
+    val isLocal: Boolean
+        get() = LOCAL_SUBS_IDS.contains(id)
 
-    suspend fun removeAssets() {
-        deleteSubscription(id)
-        DbSet.subsItemDao.delete(this)
-        DbSet.subsConfigDao.delete(id)
-        DbSet.clickLogDao.deleteBySubsId(id)
-        DbSet.categoryConfigDao.deleteBySubsItemId(id)
-    }
+    val mtimeStr by lazy { mtime.format("yyyy-MM-dd HH:mm:ss") }
 
     @Dao
     interface SubsItemDao {
@@ -67,6 +57,9 @@ data class SubsItem(
         @Insert(onConflict = OnConflictStrategy.REPLACE)
         suspend fun insert(vararg users: SubsItem): List<Long>
 
+        @Insert(onConflict = OnConflictStrategy.IGNORE)
+        suspend fun insertOrIgnore(vararg users: SubsItem): List<Long>
+
         @Delete
         suspend fun delete(vararg users: SubsItem): Int
 
@@ -79,8 +72,8 @@ data class SubsItem(
         @Query("SELECT * FROM subs_item ORDER BY `order`")
         fun queryAll(): List<SubsItem>
 
-        @Query("SELECT * FROM subs_item WHERE id=:id")
-        fun queryById(id: Long): Flow<SubsItem?>
+        @Query("DELETE FROM subs_item WHERE id IN (:ids)")
+        suspend fun deleteById(vararg ids: Long): Int
     }
 
 }

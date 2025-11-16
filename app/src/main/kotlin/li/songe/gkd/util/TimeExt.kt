@@ -1,5 +1,7 @@
 package li.songe.gkd.util
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -25,7 +27,7 @@ fun formatTimeAgo(timestamp: Long): String {
     }
 }
 
-private val formatDateMap = mutableMapOf<String, SimpleDateFormat>()
+private val formatDateMap by lazy { hashMapOf<String, SimpleDateFormat>() }
 
 fun Long.format(formatStr: String): String {
     var df = formatDateMap[formatStr]
@@ -36,13 +38,44 @@ fun Long.format(formatStr: String): String {
     return df.format(this)
 }
 
-fun useThrottle(interval: Long = 500L): (fn: () -> Unit) -> Unit {
-    var lastTriggerTime = 0L
-    return { fn ->
+data class ThrottleTimer(
+    private val interval: Long = 500L,
+) {
+    private var lastAccessTime: Long = 0L
+    fun expired(): Boolean {
         val t = System.currentTimeMillis()
-        if (t - lastTriggerTime > interval) {
-            lastTriggerTime = t
-            fn()
+        if (t - lastAccessTime > interval) {
+            lastAccessTime = t
+            return true
+        }
+        return false
+    }
+}
+
+@Composable
+fun throttle(
+    fn: (() -> Unit),
+): (() -> Unit) {
+    val timer = remember { ThrottleTimer() }
+    return remember(fn) {
+        {
+            if (timer.expired()) {
+                fn.invoke()
+            }
+        }
+    }
+}
+
+@Composable
+fun <T> throttle(
+    fn: ((T) -> Unit),
+): ((T) -> Unit) {
+    val timer = remember { ThrottleTimer() }
+    return remember(fn) {
+        {
+            if (timer.expired()) {
+                fn.invoke(it)
+            }
         }
     }
 }

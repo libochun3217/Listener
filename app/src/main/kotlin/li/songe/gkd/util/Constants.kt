@@ -1,40 +1,39 @@
 package li.songe.gkd.util
 
-import android.webkit.URLUtil
-import li.songe.gkd.BuildConfig
-
-const val VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION"
-
-const val FILE_UPLOAD_URL = "https://u.gkd.li/"
-const val IMPORT_BASE_URL = "https://i.gkd.li/i/"
-
-const val UPDATE_URL = "https://registry.npmmirror.com/@gkd-kit/app/latest/files/index.json"
+const val FILE_SHORT_URL = "https://f.gkd.li/"
+const val IMPORT_SHORT_URL = "https://i.gkd.li/i/"
 
 const val SERVER_SCRIPT_URL =
-    "https://registry-direct.npmmirror.com/@gkd-kit/config/latest/files/dist/server.js"
+    "https://registry.npmmirror.com/@gkd-kit/config/latest/files/dist/server.js"
 
 const val REPOSITORY_URL = "https://github.com/gkd-kit/gkd"
+const val ISSUES_URL = "${REPOSITORY_URL}/issues"
 
 const val HOME_PAGE_URL = "https://gkd.li"
 
-@Suppress("SENSELESS_COMPARISON")
-val GIT_COMMIT_URL = if (BuildConfig.GIT_COMMIT_ID != null) {
-    "https://github.com/gkd-kit/gkd/commit/${BuildConfig.GIT_COMMIT_ID}"
-} else {
-    null
+const val LOCAL_SUBS_ID = -2L
+const val LOCAL_HTTP_SUBS_ID = -1L
+val LOCAL_SUBS_IDS = arrayOf(LOCAL_SUBS_ID, LOCAL_HTTP_SUBS_ID)
+
+const val EMPTY_RULE_TIP = "暂无规则"
+
+object ShortUrlSet {
+    const val URL1 = "https://gkd.li?r=1"
+    const val URL2 = "https://gkd.li?r=2"
+    const val URL3 = "https://gkd.li?r=3"
+    const val URL4 = "https://gkd.li?r=4"
+    const val URL5 = "https://gkd.li?r=5"
+    const val URL6 = "https://gkd.li?r=6"
+    const val URL10 = "https://gkd.li?r=10"
+    const val URL11 = "https://gkd.li?r=11"
+    const val URL12 = "https://gkd.li?r=12"
+    const val URL13 = "https://gkd.li?r=13"
+    const val URL14 = "https://gkd.li?r=14"
+    const val URL15 = "https://gkd.li?r=15"
 }
 
-private val safeRemoteBaseUrls = arrayOf(
-    "https://registry.npmmirror.com/@gkd-kit/",
-    "https://raw.githubusercontent.com/gkd-kit/",
+const val shizukuAppId = "moe.shizuku.privileged.api"
 
-    "https://cdn.jsdelivr.net/gh/gkd-kit/",
-    "https://cdn.jsdelivr.net/npm/@gkd-kit/",
-    "https://fastly.jsdelivr.net/gh/gkd-kit/",
-    "https://fastly.jsdelivr.net/npm/@gkd-kit/",
-)
+const val PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=li.songe.gkd"
 
-fun isSafeUrl(url: String): Boolean {
-    if (!URLUtil.isHttpsUrl(url)) return false
-    return safeRemoteBaseUrls.any { u -> url.startsWith(u) }
-}
+const val systemUiAppId = "com.android.systemui"

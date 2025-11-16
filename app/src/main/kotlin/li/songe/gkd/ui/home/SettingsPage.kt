@@ -1,490 +1,646 @@
 package li.songe.gkd.ui.home
 
-import android.provider.Settings
+import android.view.KeyEvent
+import androidx.activity.compose.LocalActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewModelScope
-import com.blankj.utilcode.util.ClipboardUtils
-import com.blankj.utilcode.util.LogUtils
-import kotlinx.coroutines.CancellationException
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ramcosta.composedestinations.generated.destinations.AboutPageDestination
+import com.ramcosta.composedestinations.generated.destinations.AdvancedPageDestination
+import com.ramcosta.composedestinations.generated.destinations.BlockA11YAppListPageDestination
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import li.songe.gkd.MainActivity
-import li.songe.gkd.appScope
+import li.songe.gkd.app
+import li.songe.gkd.permission.ignoreBatteryOptimizationsState
+import li.songe.gkd.permission.requiredPermission
+import li.songe.gkd.permission.writeSecureSettingsState
+import li.songe.gkd.service.A11yService
+import li.songe.gkd.service.StatusService
+import li.songe.gkd.service.fixRestartService
+import li.songe.gkd.store.storeFlow
+import li.songe.gkd.ui.component.CustomIconButton
+import li.songe.gkd.ui.component.CustomOutlinedTextField
+import li.songe.gkd.ui.component.FullscreenDialog
+import li.songe.gkd.ui.component.PerfIcon
+import li.songe.gkd.ui.component.PerfIconButton
+import li.songe.gkd.ui.component.PerfTopAppBar
 import li.songe.gkd.ui.component.SettingItem
+import li.songe.gkd.ui.component.TextMenu
 import li.songe.gkd.ui.component.TextSwitch
-import li.songe.gkd.ui.destinations.AboutPageDestination
-import li.songe.gkd.ui.destinations.DebugPageDestination
-import li.songe.gkd.util.LoadStatus
-import li.songe.gkd.util.LocalNavController
-import li.songe.gkd.util.authActionFlow
-import li.songe.gkd.util.buildLogFile
-import li.songe.gkd.util.canDrawOverlaysAuthAction
-import li.songe.gkd.util.checkUpdate
-import li.songe.gkd.util.checkUpdatingFlow
-import li.songe.gkd.util.launchTry
-import li.songe.gkd.util.navigate
-import li.songe.gkd.util.shareFile
-import li.songe.gkd.util.storeFlow
+import li.songe.gkd.ui.component.autoFocus
+import li.songe.gkd.ui.component.updateDialogOptions
+import li.songe.gkd.ui.share.LocalMainViewModel
+import li.songe.gkd.ui.share.asMutableState
+import li.songe.gkd.ui.style.EmptyHeight
+import li.songe.gkd.ui.style.iconTextSize
+import li.songe.gkd.ui.style.itemHorizontalPadding
+import li.songe.gkd.ui.style.titleItemPadding
+import li.songe.gkd.util.AndroidTarget
+import li.songe.gkd.util.DarkThemeOption
+import li.songe.gkd.util.SafeR
+import li.songe.gkd.util.findOption
+import li.songe.gkd.util.launchAsFn
+import li.songe.gkd.util.mapState
+import li.songe.gkd.util.openA11ySettings
+import li.songe.gkd.util.openAppDetailsSettings
+import li.songe.gkd.util.throttle
 import li.songe.gkd.util.toast
-
-val settingsNav = BottomNavItem(
-    label = "设置", icon = Icons.Outlined.Settings
-)
 
 @Composable
 fun useSettingsPage(): ScaffoldExt {
-    val context = LocalContext.current as MainActivity
-    val navController = LocalNavController.current
+    val mainVm = LocalMainViewModel.current
+    val context = LocalActivity.current as MainActivity
     val store by storeFlow.collectAsState()
-    val vm = hiltViewModel<HomeVm>()
-    val uploadStatus by vm.uploadStatusFlow.collectAsState()
+    val vm = viewModel<HomeVm>()
 
-    var showSubsIntervalDlg by remember {
-        mutableStateOf(false)
-    }
-    var showEnableDarkThemeDlg by remember {
-        mutableStateOf(false)
-    }
-    var showToastInputDlg by remember {
-        mutableStateOf(false)
-    }
-
-    var showShareLogDlg by remember {
-        mutableStateOf(false)
-    }
-
-    val checkUpdating by checkUpdatingFlow.collectAsState()
-
-
-    if (showSubsIntervalDlg) {
-        Dialog(onDismissRequest = { showSubsIntervalDlg = false }) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
-            ) {
-                UpdateTimeOption.allSubObject.forEach { option ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .selectable(
-                                selected = (option.value == store.updateSubsInterval),
-                                onClick = {
-                                    storeFlow.update { it.copy(updateSubsInterval = option.value) }
-                                })
-                            .padding(horizontal = 16.dp)
-                    ) {
-                        RadioButton(
-                            selected = (option.value == store.updateSubsInterval),
-                            onClick = {
-                                storeFlow.update { it.copy(updateSubsInterval = option.value) }
-                            })
-                        Text(
-                            text = option.label, modifier = Modifier.padding(start = 16.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    if (showEnableDarkThemeDlg) {
-        Dialog(onDismissRequest = { showEnableDarkThemeDlg = false }) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
-            ) {
-                darkThemeRadioOptions.forEach { option ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .selectable(selected = (option.second == store.enableDarkTheme),
-                                onClick = {
-                                    storeFlow.value =
-                                        store.copy(enableDarkTheme = option.second)
-                                })
-                            .padding(horizontal = 16.dp)
-                    ) {
-                        RadioButton(
-                            selected = (option.second == store.enableDarkTheme),
-                            onClick = {
-                                storeFlow.value = store.copy(enableDarkTheme = option.second)
-                            })
-                        Text(
-                            text = option.first, modifier = Modifier.padding(start = 16.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
+    var showToastInputDlg by vm.showToastInputDlgFlow.asMutableState()
 
     if (showToastInputDlg) {
         var value by remember {
-            mutableStateOf(store.clickToast)
+            mutableStateOf(store.actionToast)
         }
         val maxCharLen = 32
-        AlertDialog(title = { Text(text = "请输入提示文字") }, text = {
-            OutlinedTextField(
-                value = value,
-                onValueChange = {
-                    value = it.take(maxCharLen)
-                },
-                singleLine = true,
-                supportingText = {
-                    Text(
-                        text = "${value.length} / $maxCharLen",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.End,
-                    )
-                },
-            )
-        }, onDismissRequest = { showToastInputDlg = false }, confirmButton = {
-            TextButton(
-                enabled = value.isNotEmpty(),
-                onClick = {
-                    storeFlow.value = store.copy(
-                        clickToast = value
-                    )
+        AlertDialog(
+            properties = DialogProperties(dismissOnClickOutside = false),
+            title = { Text(text = "触发提示") },
+            text = {
+                OutlinedTextField(
+                    value = value,
+                    placeholder = {
+                        Text(text = "请输入提示内容")
+                    },
+                    onValueChange = {
+                        value = it.take(maxCharLen)
+                    },
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            text = "${value.length} / $maxCharLen",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.End,
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .autoFocus()
+                )
+            },
+            onDismissRequest = { showToastInputDlg = false },
+            confirmButton = {
+                TextButton(enabled = value.isNotEmpty(), onClick = {
+                    if (value != storeFlow.value.actionToast) {
+                        storeFlow.update { it.copy(actionToast = value) }
+                        toast("更新成功")
+                    }
                     showToastInputDlg = false
+                }) {
+                    Text(text = "确认")
                 }
-            ) {
-                Text(
-                    text = "确认",
-                )
+            },
+            dismissButton = {
+                TextButton(onClick = { showToastInputDlg = false }) {
+                    Text(text = "取消")
+                }
             }
-        }, dismissButton = {
-            TextButton(onClick = { showToastInputDlg = false }) {
-                Text(
-                    text = "取消",
-                )
-            }
-        })
+        )
     }
 
-    if (showShareLogDlg) {
-        Dialog(onDismissRequest = { showShareLogDlg = false }) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
-            ) {
-                val modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                Text(
-                    text = "调用系统分享", modifier = Modifier
-                        .clickable(onClick = {
-                            showShareLogDlg = false
-                            vm.viewModelScope.launchTry(Dispatchers.IO) {
-                                val logZipFile = buildLogFile()
-                                context.shareFile(logZipFile, "分享日志文件")
+    var showNotifTextInputDlg by vm.showNotifTextInputDlgFlow.asMutableState()
+    if (showNotifTextInputDlg) {
+        var titleValue by remember { mutableStateOf(store.customNotifTitle) }
+        var textValue by remember { mutableStateOf(store.customNotifText) }
+        AlertDialog(
+            properties = DialogProperties(dismissOnClickOutside = false),
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(text = "通知文案")
+                    PerfIconButton(
+                        imageVector = PerfIcon.HelpOutline,
+                        contentDescription = "文案规则",
+                        onClickLabel = "打开文案规则弹窗",
+                        onClick = throttle {
+                            showNotifTextInputDlg = false
+                            val confirmAction = {
+                                mainVm.dialogFlow.value = null
+                                showNotifTextInputDlg = true
                             }
-                        })
-                        .then(modifier)
-                )
-                Text(
-                    text = "生成链接(需科学上网)", modifier = Modifier
-                        .clickable(onClick = {
-                            showShareLogDlg = false
-                            vm.viewModelScope.launchTry(Dispatchers.IO) {
-                                val logZipFile = buildLogFile()
-                                vm.uploadZip(logZipFile)
-                            }
-                        })
-                        .then(modifier)
-                )
-            }
-        }
-    }
-
-    when (val uploadStatusVal = uploadStatus) {
-        is LoadStatus.Failure -> {
-            AlertDialog(
-                title = { Text(text = "上传失败") },
-                text = {
-                    Text(text = uploadStatusVal.exception.let {
-                        it.message ?: it.toString()
-                    })
-                },
-                onDismissRequest = { vm.uploadStatusFlow.value = null },
-                confirmButton = {
-                    TextButton(onClick = {
-                        vm.uploadStatusFlow.value = null
-                    }) {
-                        Text(text = "关闭")
-                    }
-                },
-            )
-        }
-
-        is LoadStatus.Loading -> {
-            AlertDialog(
-                title = { Text(text = "上传文件中") },
-                text = {
-                    LinearProgressIndicator(
-                        progress = { uploadStatusVal.progress },
+                            mainVm.dialogFlow.updateDialogOptions(
+                                title = "文案规则",
+                                text = $$"通知文案支持变量替换，规则如下\n${i} 全局规则数\n${k} 应用数\n${u} 应用规则组数\n${n} 触发次数\n\n示例模板\n${i}全局/${k}应用/${u}规则组/${n}触发\n\n替换结果\n0全局/1应用/2规则组/3触发",
+                                confirmAction = confirmAction,
+                                onDismissRequest = confirmAction,
+                            )
+                        },
                     )
-                },
-                onDismissRequest = { },
-                confirmButton = {
-                    TextButton(onClick = {
-                        vm.uploadJob?.cancel(CancellationException("终止上传"))
-                        vm.uploadJob = null
-                    }) {
-                        Text(text = "终止上传")
-                    }
-                },
-            )
-        }
-
-        is LoadStatus.Success -> {
-            AlertDialog(title = { Text(text = "上传完成") }, text = {
-                Text(text = uploadStatusVal.result.href)
-            }, onDismissRequest = {}, dismissButton = {
-                TextButton(onClick = {
-                    vm.uploadStatusFlow.value = null
-                }) {
-                    Text(text = "关闭")
                 }
-            }, confirmButton = {
+            },
+            text = {
+                val titleMaxLen = 32
+                val textMaxLen = 64
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    CustomOutlinedTextField(
+                        label = { Text("主标题") },
+                        value = titleValue,
+                        placeholder = { Text(text = "请输入内容，支持变量替换") },
+                        onValueChange = {
+                            titleValue = (if (it.length > titleMaxLen) it.take(titleMaxLen) else it)
+                                .filter { c -> c !in "\n\r" }
+                        },
+                        supportingText = {
+                            Text(
+                                text = "${titleValue.length} / $titleMaxLen",
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.End,
+                            )
+                        },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(12.dp),
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    CustomOutlinedTextField(
+                        label = { Text("副标题") },
+                        value = textValue,
+                        placeholder = { Text(text = "请输入内容，支持变量替换") },
+                        onValueChange = {
+                            textValue = if (it.length > textMaxLen) it.take(textMaxLen) else it
+                        },
+                        supportingText = {
+                            Text(
+                                text = "${textValue.length} / $textMaxLen",
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.End,
+                            )
+                        },
+                        maxLines = 4,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .autoFocus(),
+                        contentPadding = PaddingValues(12.dp),
+                    )
+                }
+            },
+            onDismissRequest = {
+                showNotifTextInputDlg = false
+            },
+            confirmButton = {
                 TextButton(onClick = {
-                    ClipboardUtils.copyText(uploadStatusVal.result.href)
-                    toast("复制成功")
-                    vm.uploadStatusFlow.value = null
+                    context.justHideSoftInput()
+                    if (store.customNotifTitle != textValue || store.customNotifText != textValue) {
+                        storeFlow.update {
+                            it.copy(
+                                customNotifTitle = titleValue,
+                                customNotifText = textValue
+                            )
+                        }
+                        toast("更新成功")
+                    }
+                    showNotifTextInputDlg = false
                 }) {
-                    Text(text = "复制")
+                    Text(
+                        text = "确认",
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNotifTextInputDlg = false }) {
+                    Text(
+                        text = "取消",
+                    )
                 }
             })
-        }
+    }
 
-        else -> {}
+    var showToastSettingsDlg by vm.showToastSettingsDlgFlow.asMutableState()
+    if (showToastSettingsDlg) {
+        AlertDialog(
+            onDismissRequest = { showToastSettingsDlg = false },
+            title = { Text("提示设置") },
+            text = {
+                TextSwitch(
+                    paddingDisabled = true,
+                    title = "系统提示",
+                    subtitle = "系统样式触发提示",
+                    suffix = "查看限制",
+                    onSuffixClick = {
+                        showToastSettingsDlg = false
+                        val confirmAction = {
+                            mainVm.dialogFlow.value = null
+                            showToastSettingsDlg = true
+                        }
+                        mainVm.dialogFlow.updateDialogOptions(
+                            title = "限制说明",
+                            text = "系统 Toast 存在频率限制, 触发过于频繁会被系统强制不显示\n\n如果只使用开屏一类低频率规则可使用系统提示, 否则建议关闭此项使用自定义样式提示",
+                            confirmAction = confirmAction,
+                            onDismissRequest = confirmAction,
+                        )
+                    },
+                    checked = store.useSystemToast,
+                    onCheckedChange = {
+                        storeFlow.value = store.copy(
+                            useSystemToast = it
+                        )
+                    })
+            },
+            confirmButton = {
+                TextButton(onClick = { showToastSettingsDlg = false }) {
+                    Text("关闭")
+                }
+            }
+        )
+    }
+
+    var showA11yBlockDlg by vm.showA11yBlockDlgFlow.asMutableState()
+    if (showA11yBlockDlg) {
+        BlockA11yDialog(onDismissRequest = { showA11yBlockDlg = false })
     }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val scrollState = rememberScrollState()
     return ScaffoldExt(
-        navItem = settingsNav,
+        navItem = BottomNavItem.Settings,
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(scrollBehavior = scrollBehavior,
+            PerfTopAppBar(
+                scrollBehavior = scrollBehavior,
                 title = {
                     Text(
-                        text = settingsNav.label,
+                        text = BottomNavItem.Settings.label,
                     )
-                }
+                },
             )
         },
-    ) { padding ->
+    ) { contentPadding ->
         Column(
             modifier = Modifier
                 .verticalScroll(scrollState)
-                .padding(padding)
+                .padding(contentPadding)
         ) {
+
+            Text(
+                text = "常规",
+                modifier = Modifier.titleItemPadding(showTop = false),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+
             TextSwitch(
-                name = "后台隐藏",
-                desc = "在[最近任务]界面中隐藏本应用",
-                checked = store.excludeFromRecents,
-                onCheckedChange = {
-                    storeFlow.value = store.copy(
-                        excludeFromRecents = it
-                    )
-                })
-            HorizontalDivider()
-
-            TextSwitch(name = "前台悬浮窗",
-                desc = "添加透明悬浮窗,关闭可能导致不点击/点击缓慢",
-                checked = store.enableAbFloatWindow,
-                onCheckedChange = {
-                    storeFlow.value = store.copy(
-                        enableAbFloatWindow = it
-                    )
-                })
-            HorizontalDivider()
-
-            TextSwitch(name = "点击提示",
-                desc = "触发点击时提示:[${store.clickToast}]",
+                title = "触发提示",
+                subtitle = store.actionToast,
                 checked = store.toastWhenClick,
-                modifier = Modifier.clickable {
+                onClickLabel = "打开触发提示弹窗",
+                onClick = {
                     showToastInputDlg = true
                 },
-                onCheckedChange = {
-                    if (it && !Settings.canDrawOverlays(context)) {
-                        authActionFlow.value = canDrawOverlaysAuthAction
-                        return@TextSwitch
+                suffixIcon = {
+                    CustomIconButton(
+                        size = 32.dp,
+                        onClickLabel = "打开提示设置弹窗",
+                        onClick = throttle { showToastSettingsDlg = true },
+                    ) {
+                        PerfIcon(
+                            modifier = Modifier.size(20.dp),
+                            id = SafeR.ic_page_info,
+                            contentDescription = "提示设置",
+                        )
                     }
+                },
+                onCheckedChange = {
                     storeFlow.value = store.copy(
                         toastWhenClick = it
                     )
                 })
-            HorizontalDivider()
 
-            Row(modifier = Modifier
-                .clickable {
-                    showSubsIntervalDlg = true
-                }
-                .padding(10.dp, 15.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    modifier = Modifier.weight(1f), text = "自动更新订阅", fontSize = 18.sp
-                )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = UpdateTimeOption.allSubObject.find { it.value == store.updateSubsInterval }?.label
-                            ?: store.updateSubsInterval.toString(), fontSize = 14.sp
-                    )
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = "more"
-                    )
-                }
-            }
-            HorizontalDivider()
-
-            TextSwitch(name = "自动更新应用",
-                desc = "打开应用时自动检测是否存在新版本",
-                checked = store.autoCheckAppUpdate,
+            TextSwitch(
+                title = "通知文案",
+                subtitle = if (store.useCustomNotifText) {
+                    store.customNotifTitle + " / " + store.customNotifText
+                } else {
+                    "subsStatus"
+                },
+                checked = store.useCustomNotifText,
+                onClickLabel = "打开修改通知文案弹窗",
+                onClick = { showNotifTextInputDlg = true },
                 onCheckedChange = {
                     storeFlow.value = store.copy(
-                        autoCheckAppUpdate = it
+                        useCustomNotifText = it
                     )
                 })
-            HorizontalDivider()
 
-            SettingItem(title = if (checkUpdating) "检查更新ing" else "检查更新", onClick = {
-                appScope.launchTry {
-                    if (checkUpdatingFlow.value) return@launchTry
-                    val newVersion = checkUpdate()
-                    if (newVersion == null) {
-                        toast("暂无更新")
-                    }
-                }
-            })
-            HorizontalDivider()
-
-            Row(modifier = Modifier
-                .clickable {
-                    showEnableDarkThemeDlg = true
-                }
-                .padding(10.dp, 15.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    modifier = Modifier.weight(1f), text = "深色模式", fontSize = 18.sp
-                )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = darkThemeRadioOptions.find { it.second == store.enableDarkTheme }?.first
-                            ?: store.enableDarkTheme.toString(), fontSize = 14.sp
-                    )
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = "more"
-                    )
-                }
-            }
-            HorizontalDivider()
-
-            TextSwitch(name = "保存日志",
-                desc = "保存最近7天日志,关闭后无法定位解决错误",
-                checked = store.log2FileSwitch,
+            TextSwitch(
+                title = "后台隐藏",
+                subtitle = "在「最近任务」隐藏本应用",
+                checked = store.excludeFromRecents,
                 onCheckedChange = {
                     storeFlow.value = store.copy(
-                        log2FileSwitch = it
+                        excludeFromRecents = !store.excludeFromRecents
                     )
-                    if (!it) {
-                        appScope.launchTry(Dispatchers.IO) {
-                            val logFiles = LogUtils.getLogFiles()
-                            if (logFiles.isNotEmpty()) {
-                                logFiles.forEach { f ->
-                                    f.delete()
-                                }
-                                toast("已删除全部日志")
-                            }
-                        }
+                })
+
+            val scope = rememberCoroutineScope()
+            val lazyOn = remember {
+                storeFlow.mapState(scope) { it.enableBlockA11yAppList }.debounce(300)
+                    .stateIn(scope, SharingStarted.Eagerly, store.enableBlockA11yAppList)
+            }.collectAsState()
+            AnimatedVisibility(visible = lazyOn.value) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .titleItemPadding(),
+                    text = "无障碍",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+            TextSwitch(
+                title = "局部关闭",
+                subtitle = "白名单应用内关闭无障碍",
+                checked = store.enableBlockA11yAppList ,
+                onCheckedChange = vm.viewModelScope.launchAsFn<Boolean> {
+                    if (it) {
+                        showA11yBlockDlg = true
+                    } else {
+                        storeFlow.value = store.copy(enableBlockA11yAppList = false)
+                        fixRestartService()
                     }
+                },
+            )
+            AnimatedVisibility(visible = lazyOn.value) {
+                SettingItem(title = "白名单", onClickLabel = "进入无障碍白名单页面", onClick = {
+                    mainVm.navigatePage(BlockA11YAppListPageDestination)
+                })
+            }
+
+            Text(
+                text = "外观",
+                modifier = Modifier.titleItemPadding(),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+
+            TextMenu(
+                title = "深色模式",
+                option = DarkThemeOption.objects.findOption(store.enableDarkTheme),
+                onOptionChange = {
+                    storeFlow.update { s -> s.copy(enableDarkTheme = it.value) }
                 }
             )
-            HorizontalDivider()
 
-            SettingItem(title = "分享日志", onClick = {
-                showShareLogDlg = true
-            })
-            HorizontalDivider()
+            if (AndroidTarget.S) {
+                TextSwitch(
+                    title = "动态配色",
+                    checked = store.enableDynamicColor,
+                    onCheckedChange = {
+                        storeFlow.update { s -> s.copy(enableDynamicColor = it) }
+                    }
+                )
+            }
 
-            SettingItem(title = "高级模式", onClick = {
-                navController.navigate(DebugPageDestination)
+            Text(
+                text = "其他",
+                modifier = Modifier.titleItemPadding(),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+
+            SettingItem(title = "高级设置", onClick = {
+                mainVm.navigatePage(AdvancedPageDestination)
             })
-            HorizontalDivider()
 
             SettingItem(title = "关于", onClick = {
-                navController.navigate(AboutPageDestination)
+                mainVm.navigatePage(AboutPageDestination)
             })
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(EmptyHeight))
         }
     }
 }
 
-sealed class UpdateTimeOption(val value: Long, val label: String) {
-    data object Pause : UpdateTimeOption(-1, "暂停")
-    data object Everyday : UpdateTimeOption(24 * 60 * 60_000, "每天")
-    data object Every3Days : UpdateTimeOption(24 * 60 * 60_000 * 3, "每3天")
-    data object Every7Days : UpdateTimeOption(24 * 60 * 60_000 * 7, "每7天")
-
-    companion object {
-        val allSubObject by lazy { arrayOf(Pause, Everyday, Every3Days, Every7Days) }
+@Composable
+private fun BlockA11yDialog(onDismissRequest: () -> Unit) = FullscreenDialog(onDismissRequest) {
+    val mainVm = LocalMainViewModel.current
+    val statusRunning by StatusService.isRunning.collectAsState()
+    val ignoreBatteryOptimizations by ignoreBatteryOptimizationsState.stateFlow.collectAsState()
+    val hasOtherA11y by mainVm.hasOtherA11yFlow.collectAsState()
+    val context = LocalActivity.current as MainActivity
+    Scaffold(
+        topBar = {
+            PerfTopAppBar(
+                navigationIcon = {
+                    PerfIconButton(
+                        imageVector = PerfIcon.Close,
+                        onClickLabel = "关闭弹窗",
+                        onClick = onDismissRequest,
+                    )
+                },
+                title = {
+                    Text(text = "局部关闭")
+                },
+            )
+        },
+        bottomBar = {
+            BottomAppBar {
+                Spacer(modifier = Modifier.weight(1f))
+                TextButton(
+                    enabled = statusRunning && ignoreBatteryOptimizations && !hasOtherA11y,
+                    onClick = mainVm.viewModelScope.launchAsFn {
+                        onDismissRequest()
+                        delay(200)
+                        storeFlow.update { it.copy(enableBlockA11yAppList = true) }
+                    }
+                ) {
+                    Text(text = "继续")
+                }
+                Spacer(modifier = Modifier.width(itemHorizontalPadding))
+            }
+        },
+    ) { contentPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(contentPadding)
+                .padding(horizontal = itemHorizontalPadding)
+        ) {
+            CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodyMedium) {
+                Text(text = "「局部关闭」可在白名单应用内关闭无障碍，来解决界面异常，游戏掉帧或无障碍检测的问题")
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "使用须知", style = MaterialTheme.typography.titleMedium)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    RequiredTextItem(text = "切换无障碍会造成短暂触摸卡顿，请自行测试后再编辑白名单")
+                    RequiredTextItem(text = "使用其它无障碍应用会导致优化无效，因为无障碍不会被完全关闭")
+                    RequiredTextItem(text = "必须确保无障碍关闭后的持续后台运行，否则会被系统暂停或结束运行，导致无法恢复无障碍")
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "使用条件", style = MaterialTheme.typography.titleMedium)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    RequiredTextItem(
+                        text = "Shizuku 授权",
+                        enabled = false,
+                        imageVector =  PerfIcon.Check ,
+                        onClick = mainVm.viewModelScope.launchAsFn(Dispatchers.IO) {
+                            mainVm.guardShizukuContext()
+                        },
+                    )
+                    RequiredTextItem(
+                        text = "开启「常驻通知」",
+                        enabled = !statusRunning,
+                        imageVector = if (statusRunning) PerfIcon.Check else PerfIcon.ArrowForward,
+                        onClick = mainVm.viewModelScope.launchAsFn {
+                            StatusService.requestStart(context)
+                        },
+                    )
+                    RequiredTextItem(
+                        text = "省电策略设置为无限制",
+                        enabled = !ignoreBatteryOptimizations,
+                        imageVector = if (ignoreBatteryOptimizations) PerfIcon.Check else PerfIcon.ArrowForward,
+                        onClickLabel = "打开忽略电池优化设置页面",
+                        onClick = mainVm.viewModelScope.launchAsFn {
+                            requiredPermission(context, ignoreBatteryOptimizationsState)
+                        },
+                    )
+                    RequiredTextItem(
+                        text = "关闭其它应用的无障碍",
+                        enabled = hasOtherA11y,
+                        imageVector = if (!hasOtherA11y) PerfIcon.Check else PerfIcon.ArrowForward,
+                        onClick = {
+                            if (writeSecureSettingsState.updateAndGet()) {
+                                if (A11yService.isRunning.value) {
+                                    setOf(A11yService.a11yCn)
+                                } else {
+                                    emptySet()
+                                }.let {
+                                    app.putSecureA11yServices(it)
+                                }
+                                toast("关闭成功")
+                            } else {
+                                openA11ySettings()
+                            }
+                        },
+                    )
+                    RequiredTextItem(
+                        text = "允许自启动",
+                        enabled = true,
+                        imageVector = PerfIcon.OpenInNew,
+                        onClickLabel = "打开应用详情页面",
+                        onClick = {
+                            openAppDetailsSettings()
+                        },
+                    )
+                    RequiredTextItem(
+                        text = "在「最近任务界面」锁定",
+                        enabled = true,
+                        imageVector = PerfIcon.OpenInNew,
+                        onClickLabel = "打开应用详情页面",
+                        onClick = {
+                        },
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "某些场景下无障碍刚启动时概率不工作，如多次遇到此情况则不建议使用此功能")
+            }
+            Spacer(modifier = Modifier.height(EmptyHeight))
+        }
     }
 }
 
-private val darkThemeRadioOptions = arrayOf(
-    "跟随系统" to null,
-    "启用" to true,
-    "关闭" to false,
-)
+@Composable
+private fun RequiredTextItem(
+    text: String,
+    imageVector: ImageVector? = null,
+    enabled: Boolean = false,
+    onClick: (() -> Unit)? = null,
+    onClickLabel: String? = null,
+) {
+    Row(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.extraSmall)
+            .run {
+                if (onClick != null) {
+                    clickable(
+                        enabled = enabled,
+                        onClick = throttle(onClick),
+                        onClickLabel = onClickLabel
+                    )
+                } else {
+                    this
+                }
+            }
+            .padding(horizontal = 4.dp),
+    ) {
+        val lineHeightDp = LocalDensity.current.run { LocalTextStyle.current.lineHeight.toDp() }
+        Spacer(
+            modifier = Modifier
+                .padding(vertical = (lineHeightDp - 4.dp) / 2)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.tertiary)
+                .size(4.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = text)
+        if (imageVector != null) {
+            PerfIcon(
+                imageVector = imageVector,
+                modifier = Modifier.iconTextSize(),
+            )
+        }
+    }
+
+}

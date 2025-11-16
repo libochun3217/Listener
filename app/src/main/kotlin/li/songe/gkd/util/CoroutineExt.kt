@@ -1,63 +1,76 @@
 package li.songe.gkd.util
 
+import androidx.compose.runtime.Composable
 import com.blankj.utilcode.util.LogUtils
-import com.hjq.toast.Toaster
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.coroutines.coroutineContext
 
 fun CoroutineScope.launchTry(
     context: CoroutineContext = EmptyCoroutineContext,
     start: CoroutineStart = CoroutineStart.DEFAULT,
+    silent: Boolean = false,
     block: suspend CoroutineScope.() -> Unit,
 ) = launch(context, start) {
     try {
         block()
     } catch (e: CancellationException) {
         e.printStackTrace()
-    } catch (e: Exception) {
+    } catch (_: InterruptRuleMatchException) {
+    } catch (e: Throwable) {
         e.printStackTrace()
         LogUtils.d(e)
-        Toaster.show(e.message ?: e.stackTraceToString())
+        if (!silent) {
+            toast(e.message ?: e.stackTraceToString())
+        }
     }
 }
 
+@Composable
 fun CoroutineScope.launchAsFn(
     context: CoroutineContext = EmptyCoroutineContext,
     start: CoroutineStart = CoroutineStart.DEFAULT,
     block: suspend CoroutineScope.() -> Unit,
-): () -> Unit {
-    return {
-        launch(context, start) {
-            try {
-                block()
-            } catch (e: CancellationException) {
-                e.printStackTrace()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Toaster.show(e.message ?: e.stackTraceToString())
-            }
+): () -> Unit = {
+    launch(context, start) {
+        try {
+            block()
+        } catch (e: CancellationException) {
+            e.printStackTrace()
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            toast(e.message ?: e.stackTraceToString())
         }
     }
 }
 
+@Composable
 fun <T> CoroutineScope.launchAsFn(
     context: CoroutineContext = EmptyCoroutineContext,
     start: CoroutineStart = CoroutineStart.DEFAULT,
     block: suspend CoroutineScope.(T) -> Unit,
-): (T) -> Unit {
-    return {
-        launch(context, start) {
-            try {
-                block(it)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Toaster.show(e.message ?: e.stackTraceToString())
-            }
+): (T) -> Unit = {
+    launch(context, start) {
+        try {
+            block(it)
+        } catch (e: CancellationException) {
+            e.printStackTrace()
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            toast(e.message ?: e.stackTraceToString())
         }
     }
 }
 
+suspend fun stopCoroutine(): Nothing {
+    coroutineContext[Job]?.cancel()
+    yield()
+    // the following code will not be run
+    throw CancellationException("Coroutine stopped")
+}

@@ -1,86 +1,155 @@
 package li.songe.gkd.ui
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.blankj.utilcode.util.LogUtils
+import com.ramcosta.composedestinations.generated.destinations.AppConfigPageDestination
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flattenConcat
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import li.songe.gkd.data.SubsConfig
 import li.songe.gkd.db.DbSet
-import li.songe.gkd.ui.destinations.AppConfigPageDestination
+import li.songe.gkd.store.storeFlow
+import li.songe.gkd.ui.component.ShowGroupState
+import li.songe.gkd.ui.component.toGroupState
+import li.songe.gkd.ui.share.BaseViewModel
+import li.songe.gkd.util.RuleSortOption
 import li.songe.gkd.util.collator
-import li.songe.gkd.util.ruleSummaryFlow
-import javax.inject.Inject
+import li.songe.gkd.util.findOption
+import li.songe.gkd.util.subsItemsFlow
+import li.songe.gkd.util.usedSubsEntriesFlow
 
-@HiltViewModel
-class AppConfigVm @Inject constructor(stateHandle: SavedStateHandle) : ViewModel() {
+
+class AppConfigVm(stateHandle: SavedStateHandle) : BaseViewModel() {
     private val args = AppConfigPageDestination.argsFrom(stateHandle)
 
-    private val latestGlobalLogsFlow = DbSet.clickLogDao.queryAppLatest(
-        args.appId,
-        SubsConfig.GlobalGroupType
-    )
-    private val latestAppLogsFlow = DbSet.clickLogDao.queryAppLatest(
-        args.appId,
-        SubsConfig.AppGroupType
-    )
-
-    val ruleSortTypeFlow = MutableStateFlow<RuleSortType>(RuleSortType.Default)
-
-    val globalGroupsFlow = combine(
-        ruleSummaryFlow.map { r -> r.globalGroups },
-        ruleSortTypeFlow,
-        latestGlobalLogsFlow
-    ) { list, type, logs ->
-        when (type) {
-            RuleSortType.Default -> list
-            RuleSortType.ByName -> list.sortedWith { a, b ->
-                collator.compare(
-                    a.group.name,
-                    b.group.name
-                )
-            }
-
-            RuleSortType.ByTime -> list.sortedBy { a ->
-                -(logs.find { c -> c.groupKey == a.group.key && c.subsId == a.subsItem.id }?.id
-                    ?: 0)
-            }
-        }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
-    val appGroupsFlow = combine(
-        ruleSummaryFlow.map { r -> r.appIdToAllGroups[args.appId] ?: emptyList() },
-        ruleSortTypeFlow,
-        latestAppLogsFlow
-    ) { list, type, logs ->
-        when (type) {
-            RuleSortType.Default -> list
-            RuleSortType.ByName -> list.sortedWith { a, b ->
-                collator.compare(
-                    a.group.name,
-                    b.group.name
-                )
-            }
-
-            RuleSortType.ByTime -> list.sortedBy { a ->
-                -(logs.find { c -> c.groupKey == a.group.key && c.subsId == a.subsItem.id }?.id
-                    ?: 0)
-            }
-        }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
-}
-
-sealed class RuleSortType(val value: Int, val label: String) {
-    data object Default : RuleSortType(0, "按订阅顺序")
-    data object ByTime : RuleSortType(1, "按触发时间")
-    data object ByName : RuleSortType(2, "按名称")
-
-    companion object {
-        val allSubObject by lazy { arrayOf(Default, ByTime, ByName) }
+    val ruleSortTypeFlow = storeFlow.mapNew {
+        RuleSortOption.objects.findOption(it.appRuleSort)
     }
+
+    private val usedSubsIdsFlow = subsItemsFlow.mapNew { list ->
+        list.filter { it.enable }.map { it.id }.sorted()
+    }
+
+    private val appConfigsFlow = DbSet.appConfigDao.queryAppUsedList(args.appId).attachLoad()
+
+    private val appUsedSubsIdsFlow = combine(usedSubsIdsFlow, appConfigsFlow) { ids, configs ->
+        ids.filter {
+            configs.find { c -> c.subsId == it }?.enable != false
+        }
+    }.stateInit(usedSubsIdsFlow.value)
+
+    private val latestLogsFlow = ruleSortTypeFlow.map {
+        if (it == RuleSortOption.ByActionTime) {
+            DbSet.actionLogDao.queryLatestByAppId(args.appId)
+        } else {
+            flowOf(emptyList())
+        }
+    }.flattenConcat().attachLoad().stateInit(emptyList())
+
+    val globalSubsConfigsFlow = DbSet.subsConfigDao.queryUsedGlobalConfig().attachLoad()
+        .stateInit(emptyList())
+
+    val appSubsConfigsFlow = appUsedSubsIdsFlow.map {
+        DbSet.subsConfigDao.queryAppConfig(it, args.appId)
+    }.flattenConcat().attachLoad()
+        .stateInit(emptyList())
+
+    val categoryConfigsFlow = appUsedSubsIdsFlow.map {
+        DbSet.categoryConfigDao.queryBySubsIds(it)
+    }.flattenConcat().attachLoad()
+        .stateInit(emptyList())
+
+    private val temp1ListFlow = combine(
+        appUsedSubsIdsFlow,
+        usedSubsEntriesFlow,
+        globalSubsConfigsFlow,
+    ) { usedSubsIds, list, configs ->
+        list.map { e ->
+            val globalGroups = e.subscription.globalGroups
+                .filter { g -> configs.find { it.subsId == e.subsItem.id && it.groupKey == g.key }?.enable != false }
+            val appGroups = if (usedSubsIds.contains(e.subsItem.id)) {
+                e.subscription.getAppGroups(args.appId)
+            } else {
+                emptyList()
+            }
+            e to (globalGroups + appGroups)
+        }.filter { it.second.isNotEmpty() }
+    }.stateInit(emptyList())
+
+    val subsPairsFlow = combine(
+        temp1ListFlow,
+        latestLogsFlow,
+        ruleSortTypeFlow
+    ) { list, logs, sortType ->
+        when (sortType) {
+            RuleSortOption.ByDefault -> list
+            RuleSortOption.ByRuleName -> list.map { e ->
+                e.first to e.second.sortedWith { a, b ->
+                    collator.compare(
+                        a.name,
+                        b.name
+                    )
+                }
+            }
+
+            RuleSortOption.ByActionTime -> list.map { e ->
+                e.first to e.second.sortedBy { a ->
+                    -(logs.find { c ->
+                        c.subsId == e.first.subsItem.id && c.groupType == a.groupType && c.groupKey == a.key
+                    }?.id ?: 0)
+                }
+            }
+        }
+    }.combine(firstLoadingFlow) { list, firstLoading ->
+        if (firstLoading) {
+            emptyList()
+        } else {
+            list
+        }
+    }.stateInit(emptyList())
+
+    val groupSizeFlow = subsPairsFlow.mapNew { list ->
+        list.sumOf { it.second.size }
+    }
+
+    val isSelectedModeFlow = MutableStateFlow(false)
+    val selectedDataSetFlow = MutableStateFlow(emptySet<ShowGroupState>())
+
+    private fun getAllSelectedDataSet() = subsPairsFlow.value.map { e ->
+        e.second.map { g ->
+            g.toGroupState(subsId = e.first.subsItem.id, appId = args.appId)
+        }
+    }.flatten().toSet()
+
+    fun selectAll() {
+        selectedDataSetFlow.value = getAllSelectedDataSet()
+    }
+
+    fun invertSelect() {
+        selectedDataSetFlow.value = getAllSelectedDataSet() - selectedDataSetFlow.value
+    }
+
+    val focusGroupFlow = args.focusLog?.let {
+        MutableStateFlow<Triple<Long, String?, Int>?>(
+            Triple(
+                it.subsId,
+                if (it.groupType == SubsConfig.AppGroupType) it.appId else null,
+                it.groupKey,
+            )
+        )
+    }
+
+    init {
+        viewModelScope.launch {
+            appUsedSubsIdsFlow.collect {
+                LogUtils.d(it)
+            }
+        }
+    }
+
 }
+

@@ -1,301 +1,390 @@
 package li.songe.gkd.ui
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.ActionLogPageDestination
+import com.ramcosta.composedestinations.generated.destinations.SubsAppGroupListPageDestination
+import com.ramcosta.composedestinations.generated.destinations.UpsertRuleGroupPageDestination
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
-import li.songe.gkd.data.ExcludeData
+import li.songe.gkd.data.ActionLog
 import li.songe.gkd.data.RawSubscription
-import li.songe.gkd.data.SubsConfig
-import li.songe.gkd.data.stringify
-import li.songe.gkd.db.DbSet
-import li.songe.gkd.ui.destinations.AppItemPageDestination
-import li.songe.gkd.ui.destinations.GlobalRulePageDestination
-import li.songe.gkd.util.LocalNavController
-import li.songe.gkd.util.ProfileTransitions
-import li.songe.gkd.util.appInfoCacheFlow
-import li.songe.gkd.util.launchTry
-import li.songe.gkd.util.navigate
-import li.songe.gkd.util.toast
+import li.songe.gkd.store.storeFlow
+import li.songe.gkd.ui.component.AnimatedBooleanContent
+import li.songe.gkd.ui.component.AnimationFloatingActionButton
+import li.songe.gkd.ui.component.BatchActionButtonGroup
+import li.songe.gkd.ui.component.EmptyText
+import li.songe.gkd.ui.component.PerfIcon
+import li.songe.gkd.ui.component.PerfIconButton
+import li.songe.gkd.ui.component.PerfTopAppBar
+import li.songe.gkd.ui.component.RuleGroupCard
+import li.songe.gkd.ui.component.animateListItem
+import li.songe.gkd.ui.component.toGroupState
+import li.songe.gkd.ui.component.useListScrollState
+import li.songe.gkd.ui.icon.BackCloseIcon
+import li.songe.gkd.ui.share.ListPlaceholder
+import li.songe.gkd.ui.share.LocalMainViewModel
+import li.songe.gkd.ui.share.noRippleClickable
+import li.songe.gkd.ui.style.EmptyHeight
+import li.songe.gkd.ui.style.ProfileTransitions
+import li.songe.gkd.ui.style.iconTextSize
+import li.songe.gkd.ui.style.menuPadding
+import li.songe.gkd.ui.style.scaffoldPadding
+import li.songe.gkd.util.LOCAL_SUBS_ID
+import li.songe.gkd.util.RuleSortOption
+import li.songe.gkd.util.copyText
+import li.songe.gkd.util.launchAsFn
+import li.songe.gkd.util.switchItem
+import li.songe.gkd.util.throttle
+import li.songe.gkd.util.toJson5String
 
-@RootNavGraph
-@Destination(style = ProfileTransitions::class)
+@Suppress("unused")
+@Destination<RootGraph>(style = ProfileTransitions::class)
 @Composable
-fun AppConfigPage(appId: String) {
-    val navController = LocalNavController.current
-    val vm = hiltViewModel<AppConfigVm>()
+fun AppConfigPage(appId: String, focusLog: ActionLog? = null) {
+    val mainVm = LocalMainViewModel.current
+    val vm = viewModel<AppConfigVm>()
+
     val ruleSortType by vm.ruleSortTypeFlow.collectAsState()
-    val appInfoCache by appInfoCacheFlow.collectAsState()
-    val appInfo = appInfoCache[appId]
-    val globalGroups by vm.globalGroupsFlow.collectAsState()
-    val appGroups by vm.appGroupsFlow.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    var expanded by remember { mutableStateOf(false) }
-    val listState = rememberLazyListState()
-    var isFirstVisit by remember { mutableStateOf(true) }
-    globalGroups.map { g -> g.group }
-    LaunchedEffect(globalGroups.size, appGroups.size, ruleSortType.value) {
-        if (isFirstVisit) {
-            isFirstVisit = false
-        } else {
-            listState.scrollToItem(0)
+    val groupSize by vm.groupSizeFlow.collectAsState()
+    val firstLoading by vm.firstLoadingFlow.collectAsState()
+    val resetKey = rememberSaveable { mutableIntStateOf(0) }
+    val (scrollBehavior, listState) = useListScrollState(
+        resetKey,
+        groupSize > 0,
+        ruleSortType.value
+    )
+    if (focusLog != null && groupSize > 0) {
+        LaunchedEffect(null) {
+            if (vm.focusGroupFlow?.value != null) {
+                val i = vm.subsPairsFlow.value.run {
+                    var j = 0
+                    forEach { (entry, groups) ->
+                        groups.forEach {
+                            if (entry.subsItem.id == focusLog.subsId && it.groupType == focusLog.groupType && it.key == focusLog.groupKey) {
+                                return@run j
+                            }
+                            j++
+                        }
+                    }
+                    -1
+                }
+                if (i >= 0) {
+                    listState.scrollToItem(i)
+                }
+            }
         }
+    }
+
+    val isSelectedMode = vm.isSelectedModeFlow.collectAsState().value
+    val selectedDataSet = vm.selectedDataSetFlow.collectAsState().value
+    LaunchedEffect(key1 = isSelectedMode) {
+        if (!isSelectedMode) {
+            vm.selectedDataSetFlow.value = emptySet()
+        }
+    }
+    LaunchedEffect(key1 = selectedDataSet.isEmpty()) {
+        if (selectedDataSet.isEmpty()) {
+            vm.isSelectedModeFlow.value = false
+        }
+    }
+    BackHandler(isSelectedMode) {
+        vm.isSelectedModeFlow.value = false
     }
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(scrollBehavior = scrollBehavior, navigationIcon = {
-                IconButton(onClick = {
-                    navController.popBackStack()
+            PerfTopAppBar(scrollBehavior = scrollBehavior, navigationIcon = {
+                IconButton(onClick = throttle {
+                    if (isSelectedMode) {
+                        vm.isSelectedModeFlow.value = false
+                    } else {
+                        mainVm.popBackStack()
+                    }
                 }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null,
-                    )
+                    BackCloseIcon(backOrClose = !isSelectedMode)
                 }
             }, title = {
-                Text(
-                    text = appInfo?.name ?: appId,
-                    maxLines = 1,
-                    softWrap = false,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }, actions = {
-                IconButton(onClick = {
-                    expanded = true
-                }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Sort,
-                        contentDescription = null,
+                val titleModifier = Modifier.noRippleClickable {
+                    resetKey.intValue++
+                }
+                if (isSelectedMode) {
+                    Text(
+                        modifier = titleModifier,
+                        text = if (selectedDataSet.isNotEmpty()) selectedDataSet.size.toString() else "",
+                    )
+                } else {
+                    Text(
+                        modifier = titleModifier,
+                        text = if (selectedDataSet.isNotEmpty()) selectedDataSet.size.toString() else "",
                     )
                 }
-                Box(
-                    modifier = Modifier
-                        .wrapContentSize(Alignment.TopStart)
-                ) {
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        RuleSortType.allSubObject.forEach { s ->
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        RadioButton(
-                                            selected = ruleSortType == s,
-                                            onClick = {
-                                                vm.ruleSortTypeFlow.update { s }
+            }, actions = {
+                var expanded by remember { mutableStateOf(false) }
+                AnimatedBooleanContent(
+                    targetState = isSelectedMode,
+                    contentAlignment = Alignment.TopEnd,
+                    contentTrue = {
+                        Row {
+                            PerfIconButton(
+                                imageVector = PerfIcon.ContentCopy,
+                                enabled = selectedDataSet.any { a -> a.appId != null },
+                                onClick = throttle(vm.viewModelScope.launchAsFn(Dispatchers.Default) {
+                                    val selectGroups = mutableListOf<RawSubscription.RawAppGroup>()
+                                    vm.subsPairsFlow.value.forEach { (entry, groups) ->
+                                        groups.forEach { g ->
+                                            if (g is RawSubscription.RawAppGroup && selectedDataSet.any { v -> entry.subsItem.id == v.subsId && g.key == v.groupKey }) {
+                                                selectGroups.add(g)
                                             }
-                                        )
-                                        Text(s.label)
+                                        }
                                     }
-                                },
-                                onClick = {
-                                    vm.ruleSortTypeFlow.update { s }
-                                },
+                                    val a = RawSubscription.RawApp(
+                                        id = appId,
+                                        name = "appInfoMapFlow.value[appId]?.name",
+                                        groups = selectGroups,
+                                    )
+                                    copyText(toJson5String(a))
+                                })
                             )
+                            BatchActionButtonGroup(vm, selectedDataSet)
+                            PerfIconButton(imageVector = PerfIcon.MoreVert, onClick = {
+                                expanded = true
+                            })
+                        }
+                    },
+                    contentFalse = {
+                        Row {
+                            PerfIconButton(imageVector = PerfIcon.History, onClick = throttle {
+                                mainVm.navigatePage(ActionLogPageDestination(appId = appId))
+                            })
+                            PerfIconButton(imageVector = PerfIcon.Sort, onClick = {
+                                expanded = true
+                            })
+                        }
+                    },
+                )
+                Box(
+                    modifier = Modifier.wrapContentSize(Alignment.TopStart)
+                ) {
+                    key(isSelectedMode) {
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            if (isSelectedMode) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(text = "全选")
+                                    },
+                                    onClick = {
+                                        expanded = false
+                                        vm.selectAll()
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(text = "反选")
+                                    },
+                                    onClick = {
+                                        expanded = false
+                                        vm.invertSelect()
+                                    }
+                                )
+                            } else {
+                                Text(
+                                    text = "排序",
+                                    modifier = Modifier.menuPadding(),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                                val handleItem: (RuleSortOption) -> Unit = throttle { v ->
+                                    storeFlow.update { s -> s.copy(appRuleSort = v.value) }
+                                }
+                                RuleSortOption.objects.forEach { s ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(s.label)
+                                        },
+                                        trailingIcon = {
+                                            RadioButton(
+                                                selected = ruleSortType == s,
+                                                onClick = {
+                                                    handleItem(s)
+                                                }
+                                            )
+                                        },
+                                        onClick = {
+                                            handleItem(s)
+                                        },
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             })
         },
         floatingActionButton = {
-            FloatingActionButton(
+            AnimationFloatingActionButton(
+                visible = !isSelectedMode,
                 onClick = {
-                    navController.navigate(AppItemPageDestination(-2, appId))
+                    mainVm.navigatePage(
+                        UpsertRuleGroupPageDestination(
+                            subsId = LOCAL_SUBS_ID,
+                            groupKey = null,
+                            appId = appId
+                        )
+                    )
                 },
                 content = {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = null,
-                    )
+                    PerfIcon(imageVector = PerfIcon.Add)
                 }
             )
         },
     ) { contentPadding ->
+        val globalSubsConfigs by vm.globalSubsConfigsFlow.collectAsState()
+        val categoryConfigs by vm.categoryConfigsFlow.collectAsState()
+        val appSubsConfigs by vm.appSubsConfigsFlow.collectAsState()
+        val subsPairs by vm.subsPairsFlow.collectAsState()
         LazyColumn(
-            modifier = Modifier.padding(contentPadding),
+            modifier = Modifier.scaffoldPadding(contentPadding),
             state = listState,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            items(globalGroups) { g ->
-                val excludeData = remember(g.config?.exclude) {
-                    ExcludeData.parse(g.config?.exclude)
-                }
-                val checked = getChecked(excludeData, g.group, appId, appInfo)
-                AppGroupCard(g.group, checked ?: false, onClick = {
-                    navController.navigate(GlobalRulePageDestination(g.subsItem.id, g.group.key))
-                }) { newChecked ->
-                    if (checked == null) {
-                        toast("内置禁用,不可修改")
-                        return@AppGroupCard
+            subsPairs.forEach { (entry, groups) ->
+                val subsId = entry.subsItem.id
+                stickyHeader(entry.subsItem.id) {
+                    Row(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(horizontal = 8.dp)
+                            .clip(MaterialTheme.shapes.extraSmall)
+                            .clickable(onClick = throttle {
+                                mainVm.navigatePage(
+                                    SubsAppGroupListPageDestination(
+                                        subsItemId = subsId,
+                                        appId = appId,
+                                    )
+                                )
+                            })
+                            .fillMaxWidth()
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = entry.subscription.name,
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        PerfIcon(
+                            imageVector = PerfIcon.KeyboardArrowRight,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.iconTextSize()
+                        )
                     }
-                    vm.viewModelScope.launchTry {
-                        DbSet.subsConfigDao.insert(
-                            (g.config ?: SubsConfig(
-                                type = SubsConfig.GlobalGroupType,
-                                subsItemId = g.subsItem.id,
-                                groupKey = g.group.key,
-                            )).copy(
-                                exclude = excludeData.copy(
-                                    appIds = excludeData.appIds.toMutableMap().apply {
-                                        set(appId, !newChecked)
-                                    }
-                                ).stringify()
+                }
+                items(groups, { Triple(subsId, it.groupType, it.key) }) { group ->
+                    val subsConfig = when (group) {
+                        is RawSubscription.RawAppGroup -> appSubsConfigs
+                        is RawSubscription.RawGlobalGroup -> globalSubsConfigs
+                    }.find { it.subsId == entry.subsItem.id && it.groupKey == group.key }
+                    val category = when (group) {
+                        is RawSubscription.RawAppGroup -> entry.subscription.groupToCategoryMap[group]
+                        is RawSubscription.RawGlobalGroup -> null
+                    }
+                    val categoryConfig = if (category != null) {
+                        categoryConfigs.find { it.subsId == subsId && it.categoryKey == category.key }
+                    } else {
+                        null
+                    }
+                    val isSelected = selectedDataSet.any {
+                        it.subsId == subsId && it.groupType == group.groupType && it.groupKey == group.key
+                    }
+                    val onLongClick = {
+                        if (groupSize > 1 && !isSelectedMode) {
+                            vm.isSelectedModeFlow.value = true
+                            vm.selectedDataSetFlow.value = setOf(
+                                group.toGroupState(
+                                    subsId = subsId,
+                                    appId = appId,
+                                )
                             )
-                        )
+                        }
                     }
-                }
-            }
-            item {
-                if (globalGroups.isNotEmpty() && appGroups.isNotEmpty()) {
-                    HorizontalDivider()
-                }
-            }
-            items(appGroups) { g ->
-                AppGroupCard(g.group, g.enable, onClick = {
-                    navController.navigate(
-                        AppItemPageDestination(
-                            g.subsItem.id,
-                            appId,
-                            g.group.key,
-                        )
-                    )
-                }) {
-                    vm.viewModelScope.launchTry {
-                        DbSet.subsConfigDao.insert(
-                            g.config?.copy(enable = it) ?: SubsConfig(
-                                type = SubsConfig.AppGroupType,
-                                subsItemId = g.subsItem.id,
-                                appId = appId,
-                                groupKey = g.group.key,
-                                enable = it
+                    val onSelectedChange = {
+                        vm.selectedDataSetFlow.value =
+                            selectedDataSet.switchItem(
+                                group.toGroupState(
+                                    subsId = subsId,
+                                    appId = appId,
+                                )
                             )
-                        )
                     }
+                    RuleGroupCard(
+                        modifier = Modifier.animateListItem(),
+                        subs = entry.subscription,
+                        appId = appId,
+                        group = group,
+                        subsConfig = subsConfig,
+                        category = category,
+                        categoryConfig = categoryConfig,
+                        onLongClick = onLongClick,
+                        isSelectedMode = isSelectedMode,
+                        isSelected = isSelected,
+                        onSelectedChange = onSelectedChange,
+                        focusGroupFlow = vm.focusGroupFlow,
+                    )
                 }
             }
-            item {
-                Spacer(modifier = Modifier.height(40.dp))
-                if (globalGroups.size + appGroups.size == 0) {
-                    Text(
-                        text = "暂无规则",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-                } else {
-                    // 避免被 floatingActionButton 遮挡
-                    Spacer(modifier = Modifier.height(40.dp))
+            item(ListPlaceholder.KEY, ListPlaceholder.TYPE) {
+                Spacer(modifier = Modifier.height(EmptyHeight))
+                if (groupSize == 0 && !firstLoading) {
+                    EmptyText(text = "暂无规则")
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun AppGroupCard(
-    group: RawSubscription.RawGroupProps,
-    enable: Boolean,
-    onClick: () -> Unit,
-    onCheckedChange: ((Boolean) -> Unit)?,
-) {
-    Row(
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(10.dp, 6.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = group.name,
-                maxLines = 1,
-                softWrap = false,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (group.valid) {
-                if (!group.desc.isNullOrBlank()) {
-                    Text(
-                        text = group.desc!!,
-                        maxLines = 1,
-                        softWrap = false,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.fillMaxWidth(),
-                        fontSize = 14.sp
-                    )
-                } else {
-                    Text(
-                        text = "暂无描述",
-                        modifier = Modifier.fillMaxWidth(),
-                        fontSize = 14.sp,
-                        color = LocalContentColor.current.copy(alpha = 0.5f)
-                    )
-                }
-            } else {
-                Text(
-                    text = "非法选择器",
-                    modifier = Modifier.fillMaxWidth(),
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-        }
-        Spacer(modifier = Modifier.width(10.dp))
-        Switch(checked = enable, modifier = Modifier, onCheckedChange = onCheckedChange)
     }
 }

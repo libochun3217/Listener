@@ -1,36 +1,77 @@
 # gkd
 
-基于 **无障碍** + **高级选择器** + **订阅规则** 的自定义屏幕点击 APP
+<p align="center">
+<a href="https://gkd.li/"><img src="https://e.gkd.li/2a0a7787-f2dd-4529-a885-93f3b8c857c3" alt="GKD.LI" width="40%" /></a>
+</p>
+
+基于 [高级选择器](https://gkd.li/guide/selector) + [订阅规则](https://gkd.li/guide/subscription) + [快照审查](https://github.com/gkd-kit/inspect) 的自定义屏幕点击 Android 应用
+
+通过自定义规则，在指定界面，满足指定条件(如屏幕上存在特定文字)时，点击特定的节点或位置或执行其他操作
+
+- **快捷操作**
+
+  帮助你简化一些重复的流程, 如某些软件自动确认电脑登录
+
+- **跳过流程**
+
+  某些软件可能在启动时存在一些烦人的流程, 这个软件可以帮助你点击跳过这个流程
+
+## 免责声明
+
+**本项目遵循 [GPL-3.0](/LICENSE) 开源，项目仅供学习交流，禁止用于商业或非法用途**
 
 ## 安装
 
-- [gkd.li](https://gkd.li/guide/)
-- [releases](https://github.com/gkd-kit/gkd/releases)
+<a href="https://gkd.li/guide/"><img src="https://e.gkd.li/f23b704d-d781-494b-9719-393f95683b89" alt="Download from GKD.LI" width="32%" /></a><a href="https://play.google.com/store/apps/details?id=li.songe.gkd"><img src="https://e.gkd.li/f63fabeb-0342-4961-a46d-cac61b0f8856" alt="Download from Google Play" width="32%" /></a><a href="https://github.com/gkd-kit/gkd/releases"><img src="https://e.gkd.li/c1ef2bb9-7472-46d5-9806-81b4c37e5b4d" alt="Download from GitHub releases" width="32%" /></a>
 
-## 功能
+如遇问题请先查看 [疑难解答](https://gkd.li/guide/faq)
 
-基于 [高级选择器](https://gkd.li/selector/) + [订阅规则](https://gkd.li/subscription/) + [快照审查](https://github.com/gkd-kit/inspect) 实现根据屏幕上下文信息自定义点击目标控件
+## 截图
 
-本应用 **默认不携带任何规则**，官方也不再提供任何规则, 需要用户自行添加本地规则，或者通过订阅链接的方式获取规则
+|                                                                                         |                                                                                         |                                                                                         |                                                                                         |
+| --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| ![img](https://e.gkd.li/70aa3257-a7f0-4abf-81ba-02486663c248) | ![img](https://e.gkd.li/64c7c0f2-2e6d-4a79-8106-ca1988abe3ef) | ![img](https://e.gkd.li/17c61583-a0d8-4d96-a455-32f88137a1fd) | ![img](https://e.gkd.li/5622e324-ee35-40d5-aad5-5196cc9ac582) |
+| ![img](https://e.gkd.li/27e5a936-61a2-45c0-b415-f96f2e27b131) | ![img](https://e.gkd.li/a0a62e53-8ba6-42fe-9b85-25faf26b070f) | ![img](https://e.gkd.li/7cfd74f3-8ff2-4bf0-a5e1-0578c3e9f69d) | ![img](https://e.gkd.li/967e84fa-8673-4b0a-b2a8-2b5374a631ee) |
 
-或者通过 [subscription-template](https://github.com/gkd-kit/subscription-template) 快速构建自己的远程订阅
+## 订阅
 
-|                                                                                             |                                                                                             |                                                                                             |                                                                                             |
-| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| ![img](https://github.com/gkd-kit/gkd/assets/38517192/e99f43b7-2247-4682-9981-f5d4ec9b483f) | ![img](https://github.com/gkd-kit/gkd/assets/38517192/2d22ee71-d6fd-4dfe-b52f-d73df02f5009) | ![img](https://github.com/gkd-kit/gkd/assets/38517192/b2deafde-d933-402f-a9ce-ebae521b439f) | ![img](https://github.com/gkd-kit/gkd/assets/38517192/7be30706-3e76-4685-b853-3294c362999f) |
-| ![img](https://github.com/gkd-kit/gkd/assets/38517192/1cca31e6-ab1e-4f05-b2bb-ce4844029d52) | ![img](https://github.com/gkd-kit/gkd/assets/38517192/905c2f8d-6af4-4870-b00e-27f6844467aa) | ![img](https://github.com/gkd-kit/gkd/assets/38517192/79f4b6cd-c9c9-4c58-a613-f7f8951dfa61) | ![img](https://github.com/gkd-kit/gkd/assets/38517192/43f7024c-2227-4476-b90c-7dc6f1e4264d) |
+GKD **默认不提供规则**，需自行添加本地规则，或者通过订阅链接的方式获取远程规则
+
+也可通过 [subscription-template](https://github.com/gkd-kit/subscription-template) 快速构建自己的远程订阅
+
+第三方订阅列表可在 <https://github.com/topics/gkd-subscription> 查看
+
+要加入此列表, 需点击仓库主页右上角设置图标后在 Topics 中添加 `gkd-subscription`
+
+<details>
+<summary>示例图片 - 添加至 Topics (点击展开)</summary>
+
+![image](https://e.gkd.li/9e340459-254f-4ca0-8a44-cc823069e5a7)
+
+</details>
 
 ## 选择器
 
-<https://gkd.li/selector/>
+一个类似 CSS 选择器的选择器, 能联系节点上下文信息, 更容易也更精确找到目标节点
+
+<https://gkd.li/guide/selector>
 
 [@[vid=\"menu\"] < [vid=\"menu_container\"] - [vid=\"dot_text_layout\"] > [text^=\"广告\"]](https://i.gkd.li/i/14881985?gkd=QFt2aWQ9Im1lbnUiXSA8IFt2aWQ9Im1lbnVfY29udGFpbmVyIl0gLSBbdmlkPSJkb3RfdGV4dF9sYXlvdXQiXSA-IFt0ZXh0Xj0i5bm_5ZGKIl0)
 
-![image](https://github.com/gkd-kit/gkd/assets/38517192/980db09f-2c50-4ca0-a8e3-43dce10e38f0)
+<details>
+<summary>示例图片 - 选择器路径视图 (点击展开)</summary>
 
-## LICENSE
+[![image](https://e.gkd.li/a2ae667b-b8c5-4556-a816-37743347b972)](https://i.gkd.li/i/14881985?gkd=QFt2aWQ9Im1lbnUiXSA8IFt2aWQ9Im1lbnVfY29udGFpbmVyIl0gLSBbdmlkPSJkb3RfdGV4dF9sYXlvdXQiXSA-IFt0ZXh0Xj0i5bm_5ZGKIl0)
 
-本项目使用 [GPL-v3](https://www.gnu.org/licenses/gpl-3.0.html) 协议开源
+</details>
+
+## 捐赠
+
+如果 GKD 对你有用, 可以通过以下链接支持该项目
+
+<https://github.com/lisonge/sponsor>
+
+或前往 [Google Play](https://play.google.com/store/apps/details?id=li.songe.gkd) 给个好评
 
 ## Star History
 
