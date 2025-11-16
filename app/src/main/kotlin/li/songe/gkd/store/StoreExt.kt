@@ -6,9 +6,9 @@ import kotlinx.coroutines.flow.update
 import li.songe.gkd.appScope
 import li.songe.gkd.service.ExposeService
 import li.songe.gkd.ui.gkdStartCommandText
-import li.songe.gkd.util.AppListString
-import li.songe.gkd.util.launchTry
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.AppListString
+import li.songe.gkd.a11y.util.launchTry
+import li.songe.gkd.a11y.util.toast
 
 val storeFlow: MutableStateFlow<SettingsStore> by lazy {
     createAnyFlow(
@@ -28,7 +28,7 @@ val actionCountFlow: MutableStateFlow<Long> by lazy {
 val blockMatchAppListFlow: MutableStateFlow<Set<String>> by lazy {
     createTextFlow(
         key = "block_match_app_list",
-        decode = { it?.let(AppListString::decode) ?: AppListString.getDefaultBlockList() },
+        decode = { it?.let(AppListString::decode) ?: emptySet() },
         encode = AppListString::encode,
     )
 }

@@ -4,9 +4,6 @@ import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -84,13 +81,12 @@ import li.songe.gkd.util.deleteSubscription
 import li.songe.gkd.util.findOption
 import li.songe.gkd.util.getUpDownTransform
 import li.songe.gkd.util.launchAsFn
-import li.songe.gkd.util.launchTry
+import li.songe.gkd.a11y.util.launchTry
 import li.songe.gkd.util.mapState
-import li.songe.gkd.util.ruleSummaryFlow
 import li.songe.gkd.util.subsItemsFlow
 import li.songe.gkd.util.subsMapFlow
 import li.songe.gkd.util.throttle
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.toast
 import li.songe.gkd.util.updateSubsMutex
 import li.songe.gkd.util.usedSubsEntriesFlow
 import sh.calvin.reorderable.ReorderableItem

@@ -173,8 +173,9 @@ composeCompiler {
 }
 
 dependencies {
-    implementation(libs.kotlin.stdlib)
+    implementation(project(":a11y"))
 
+    implementation(libs.kotlin.stdlib)
 
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)

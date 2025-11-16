@@ -11,8 +11,7 @@ import androidx.room.Query
 import androidx.room.migration.AutoMigrationSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
-import li.songe.gkd.util.format
-import li.songe.gkd.util.getShowActivityId
+import li.songe.gkd.a11y.util.format
 
 @Serializable
 @Entity(
@@ -31,7 +30,7 @@ data class ActionLog(
     @ColumnInfo(name = "rule_key") val ruleKey: Int? = null,
 ) {
 
-    val showActivityId by lazy { getShowActivityId(appId, activityId) }
+    val showActivityId by lazy { "getShowActivityId(appId, activityId)" }
 
     val date by lazy { ctime.format("HH:mm:ss SSS") }
 

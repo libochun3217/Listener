@@ -13,7 +13,7 @@ import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 import li.songe.gkd.util.LOCAL_SUBS_IDS
-import li.songe.gkd.util.format
+import li.songe.gkd.a11y.util.format
 
 @Serializable
 @Entity(

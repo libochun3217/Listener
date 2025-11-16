@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import li.songe.gkd.util.OnTileLife
+import li.songe.gkd.a11y.util.OnTileLife
 
 abstract class BaseTileService : TileService(), OnTileLife {
     override fun onCreate() = onCreated()

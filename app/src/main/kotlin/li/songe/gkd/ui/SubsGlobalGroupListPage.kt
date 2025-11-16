@@ -58,7 +58,7 @@ import li.songe.gkd.util.getUpDownTransform
 import li.songe.gkd.util.launchAsFn
 import li.songe.gkd.util.switchItem
 import li.songe.gkd.util.throttle
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.toast
 import li.songe.gkd.util.updateSubscription
 
 @Suppress("unused")

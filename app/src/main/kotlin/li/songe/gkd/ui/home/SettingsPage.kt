@@ -1,6 +1,5 @@
 package li.songe.gkd.ui.home
 
-import android.view.KeyEvent
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -57,11 +56,8 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import li.songe.gkd.MainActivity
-import li.songe.gkd.app
 import li.songe.gkd.permission.ignoreBatteryOptimizationsState
 import li.songe.gkd.permission.requiredPermission
-import li.songe.gkd.permission.writeSecureSettingsState
-import li.songe.gkd.service.A11yService
 import li.songe.gkd.service.StatusService
 import li.songe.gkd.service.fixRestartService
 import li.songe.gkd.store.storeFlow
@@ -88,10 +84,9 @@ import li.songe.gkd.util.SafeR
 import li.songe.gkd.util.findOption
 import li.songe.gkd.util.launchAsFn
 import li.songe.gkd.util.mapState
-import li.songe.gkd.util.openA11ySettings
 import li.songe.gkd.util.openAppDetailsSettings
 import li.songe.gkd.util.throttle
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.toast
 
 @Composable
 fun useSettingsPage(): ScaffoldExt {
@@ -474,7 +469,6 @@ private fun BlockA11yDialog(onDismissRequest: () -> Unit) = FullscreenDialog(onD
     val mainVm = LocalMainViewModel.current
     val statusRunning by StatusService.isRunning.collectAsState()
     val ignoreBatteryOptimizations by ignoreBatteryOptimizationsState.stateFlow.collectAsState()
-    val hasOtherA11y by mainVm.hasOtherA11yFlow.collectAsState()
     val context = LocalActivity.current as MainActivity
     Scaffold(
         topBar = {
@@ -495,7 +489,7 @@ private fun BlockA11yDialog(onDismissRequest: () -> Unit) = FullscreenDialog(onD
             BottomAppBar {
                 Spacer(modifier = Modifier.weight(1f))
                 TextButton(
-                    enabled = statusRunning && ignoreBatteryOptimizations && !hasOtherA11y,
+                    enabled = statusRunning && ignoreBatteryOptimizations,
                     onClick = mainVm.viewModelScope.launchAsFn {
                         onDismissRequest()
                         delay(200)
@@ -554,25 +548,6 @@ private fun BlockA11yDialog(onDismissRequest: () -> Unit) = FullscreenDialog(onD
                         onClickLabel = "打开忽略电池优化设置页面",
                         onClick = mainVm.viewModelScope.launchAsFn {
                             requiredPermission(context, ignoreBatteryOptimizationsState)
-                        },
-                    )
-                    RequiredTextItem(
-                        text = "关闭其它应用的无障碍",
-                        enabled = hasOtherA11y,
-                        imageVector = if (!hasOtherA11y) PerfIcon.Check else PerfIcon.ArrowForward,
-                        onClick = {
-                            if (writeSecureSettingsState.updateAndGet()) {
-                                if (A11yService.isRunning.value) {
-                                    setOf(A11yService.a11yCn)
-                                } else {
-                                    emptySet()
-                                }.let {
-                                    app.putSecureA11yServices(it)
-                                }
-                                toast("关闭成功")
-                            } else {
-                                openA11ySettings()
-                            }
                         },
                     )
                     RequiredTextItem(

@@ -1,14 +1,12 @@
 package li.songe.gkd.a11y
 
-import android.text.format.DateUtils
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import li.songe.gkd.appScope
-import li.songe.gkd.util.appUseFile
-import li.songe.gkd.util.appendTime
-import li.songe.gkd.util.format
-import li.songe.gkd.util.launchTry
-import li.songe.gkd.util.upload
+import li.songe.gkd.a11y.util.appScope
+import li.songe.gkd.a11y.util.appUseFile
+import li.songe.gkd.a11y.util.appendTime
+import li.songe.gkd.a11y.util.launchTry
+import li.songe.gkd.a11y.util.upload
 
 object AppUseListener {
     private val appUse = HashMap<String, Int>()

@@ -20,9 +20,9 @@ import li.songe.gkd.isActivityVisible
 import li.songe.gkd.permission.writeSecureSettingsState
 import li.songe.gkd.store.actualBlockA11yAppList
 import li.songe.gkd.store.storeFlow
-import li.songe.gkd.util.launchTry
+import li.songe.gkd.a11y.util.launchTry
 import li.songe.gkd.util.mapState
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.toast
 
 class GkdTileService : BaseTileService() {
     override val activeFlow = A11yService.isRunning
@@ -56,12 +56,6 @@ fun switchA11yService() = modifyA11yRun {
         }
         val names = app.getSecureA11yServices()
         app.putSecureInt(Settings.Secure.ACCESSIBILITY_ENABLED, 1)
-        if (names.contains(A11yService.a11yCn)) { // 当前无障碍异常, 重启服务
-            names.remove(A11yService.a11yCn)
-            app.putSecureA11yServices(names)
-            delay(A11Y_AWAIT_FIX_TIME)
-        }
-        names.add(A11yService.a11yCn)
         app.putSecureA11yServices(names)
         delay(A11Y_AWAIT_START_TIME)
         // https://github.com/orgs/gkd-kit/discussions/799
@@ -87,15 +81,6 @@ fun fixRestartService() = modifyA11yRun {
             }
         }
         val names = app.getSecureA11yServices()
-        val a11yBroken = names.contains(A11yService.a11yCn)
-        if (a11yBroken) {
-            // 无障碍出现故障, 重启服务
-            names.remove(A11yService.a11yCn)
-            app.putSecureA11yServices(names)
-            // 必须等待一段时间, 否则概率不会触发系统重启无障碍
-            delay(A11Y_AWAIT_FIX_TIME)
-        }
-        names.add(A11yService.a11yCn)
         app.putSecureA11yServices(names)
         delay(A11Y_AWAIT_START_TIME)
         if (!A11yService.isRunning.value) {
@@ -121,11 +106,9 @@ private fun forcedUpdateA11yService(disabled: Boolean) = modifyA11yRun {
     val names = app.getSecureA11yServices()
     if (disabled) {
         A11yService.instance?.apply {
-            willDestroyByBlock = true
             disableSelf()
         }
     } else {
-        names.add(A11yService.a11yCn)
         app.putSecureA11yServices(names)
     }
 }

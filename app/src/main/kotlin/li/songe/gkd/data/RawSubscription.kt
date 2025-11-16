@@ -18,9 +18,9 @@ import kotlinx.serialization.json.long
 import li.songe.gkd.util.LOCAL_SUBS_IDS
 import li.songe.gkd.util.distinctByIfAny
 import li.songe.gkd.util.filterIfNotAll
-import li.songe.gkd.util.json
+import li.songe.gkd.a11y.util.json
 import li.songe.gkd.util.toJson5String
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.toast
 import li.songe.json5.Json5
 import net.objecthunter.exp4j.Expression
 import net.objecthunter.exp4j.ExpressionBuilder

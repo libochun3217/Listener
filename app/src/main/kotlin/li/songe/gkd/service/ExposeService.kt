@@ -8,9 +8,9 @@ import li.songe.gkd.appScope
 import li.songe.gkd.notif.exposeNotif
 import li.songe.gkd.util.SnapshotExt
 import li.songe.gkd.util.componentName
-import li.songe.gkd.util.launchTry
-import li.songe.gkd.util.shFolder
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.launchTry
+import li.songe.gkd.a11y.util.shFolder
+import li.songe.gkd.a11y.util.toast
 
 class ExposeService : Service() {
     override fun onBind(intent: Intent?): Binder? = null

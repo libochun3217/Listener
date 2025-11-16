@@ -109,8 +109,6 @@ fun useControlPage(): ScaffoldExt {
                 title = "服务状态",
                 subtitle = if (a11yRunning) {
                     "无障碍正在运行"
-                } else if (mainVm.a11yServiceEnabledFlow.collectAsState().value) {
-                    "无障碍发生故障"
                 } else if (writeSecureSettings) {
                     if (store.enableService && a11yPartDisabledFlow.collectAsState().value) {
                         "无障碍局部关闭"

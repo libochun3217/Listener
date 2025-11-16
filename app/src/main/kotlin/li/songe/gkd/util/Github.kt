@@ -16,7 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
-import com.hjq.toast.Toaster
 import com.ramcosta.composedestinations.generated.destinations.WebViewPageDestination
 import io.ktor.client.call.body
 import io.ktor.client.plugins.onUpload
@@ -36,7 +35,7 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
-import li.songe.gkd.app
+import li.songe.gkd.a11y.util.GithubCookieException
 import li.songe.gkd.data.GithubPoliciesAsset
 import li.songe.gkd.ui.component.PerfIcon
 import li.songe.gkd.ui.component.PerfIconButton

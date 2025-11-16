@@ -73,9 +73,9 @@ import li.songe.gkd.util.EditGithubCookieDlg
 import li.songe.gkd.util.KeyboardUtils
 import li.songe.gkd.util.componentName
 import li.songe.gkd.util.fixSomeProblems
-import li.songe.gkd.util.launchTry
+import li.songe.gkd.a11y.util.launchTry
 import li.songe.gkd.util.mapState
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.toast
 import kotlin.concurrent.Volatile
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName

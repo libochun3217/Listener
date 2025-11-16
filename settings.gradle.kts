@@ -31,3 +31,4 @@ dependencyResolutionManagement {
         maven("https://jitpack.io")
     }
 }
+include(":a11y")

@@ -5,7 +5,7 @@ import com.blankj.utilcode.util.LogUtils
 import kotlinx.serialization.Serializable
 import li.songe.gkd.a11y.MAX_CHILD_SIZE
 import li.songe.gkd.a11y.topActivityFlow
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.toast
 import kotlin.system.measureTimeMillis
 
 @Serializable

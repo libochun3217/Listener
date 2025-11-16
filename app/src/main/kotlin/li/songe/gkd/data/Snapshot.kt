@@ -12,7 +12,7 @@ import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 import li.songe.gkd.util.SnapshotExt
-import li.songe.gkd.util.format
+import li.songe.gkd.a11y.util.format
 
 @Entity(
     tableName = "snapshot",

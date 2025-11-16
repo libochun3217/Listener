@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
 import li.songe.gkd.store.blockMatchAppListFlow
 import li.songe.gkd.ui.share.BaseViewModel
-import li.songe.gkd.util.AppListString
+import li.songe.gkd.a11y.util.AppListString
 
 class EditBlockAppListVm : BaseViewModel() {
 

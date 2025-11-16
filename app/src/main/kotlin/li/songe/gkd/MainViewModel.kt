@@ -1,7 +1,6 @@
 package li.songe.gkd
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.webkit.URLUtil
@@ -23,8 +22,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import li.songe.gkd.a11y.useA11yServiceEnabledFlow
-import li.songe.gkd.a11y.useEnabledA11yServicesFlow
 import li.songe.gkd.data.RawSubscription
 import li.songe.gkd.data.SubsItem
 import li.songe.gkd.data.importData
@@ -32,7 +29,6 @@ import li.songe.gkd.db.DbSet
 import li.songe.gkd.permission.AuthReason
 import li.songe.gkd.permission.canQueryPkgState
 import li.songe.gkd.permission.shizukuGrantedState
-import li.songe.gkd.service.A11yService
 import li.songe.gkd.store.createTextFlow
 import li.songe.gkd.store.storeFlow
 import li.songe.gkd.ui.component.AlertDialogOptions
@@ -42,21 +38,21 @@ import li.songe.gkd.ui.component.UploadOptions
 import li.songe.gkd.ui.home.BottomNavItem
 import li.songe.gkd.ui.share.BaseViewModel
 import li.songe.gkd.util.LOCAL_SUBS_ID
-import li.songe.gkd.util.OnSimpleLife
-import li.songe.gkd.util.ThrottleTimer
+import li.songe.gkd.a11y.util.OnSimpleLife
+import li.songe.gkd.a11y.util.ThrottleTimer
 import li.songe.gkd.util.UpdateStatus
-import li.songe.gkd.util.checkUpload
-import li.songe.gkd.util.clearCache
-import li.songe.gkd.util.client
-import li.songe.gkd.util.launchTry
-import li.songe.gkd.util.login
+import li.songe.gkd.a11y.util.checkUpload
+import li.songe.gkd.a11y.util.clearCache
+import li.songe.gkd.a11y.util.client
+import li.songe.gkd.a11y.util.launchTry
+import li.songe.gkd.a11y.util.login
 import li.songe.gkd.util.openUri
 import li.songe.gkd.util.openWeChatScaner
-import li.songe.gkd.util.runMainPost
+import li.songe.gkd.a11y.util.runMainPost
 import li.songe.gkd.util.stopCoroutine
-import li.songe.gkd.util.subsFolder
+import li.songe.gkd.a11y.util.subsFolder
 import li.songe.gkd.util.subsItemsFlow
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.toast
 import li.songe.gkd.util.updateSubsMutex
 import li.songe.gkd.util.updateSubscription
 import kotlin.reflect.jvm.jvmName
@@ -293,12 +289,6 @@ class MainViewModel : BaseViewModel(), OnSimpleLife {
             stopCoroutine()
         }
         stopCoroutine()
-    }
-
-    private val a11yServicesFlow = useEnabledA11yServicesFlow()
-    val a11yServiceEnabledFlow = useA11yServiceEnabledFlow(a11yServicesFlow)
-    val hasOtherA11yFlow = a11yServicesFlow.mapNew { list ->
-        list.any { it != A11yService.a11yCn }
     }
 
     init {

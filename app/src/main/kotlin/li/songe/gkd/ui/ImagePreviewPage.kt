@@ -55,7 +55,7 @@ import li.songe.gkd.ui.component.PerfTopAppBar
 import li.songe.gkd.ui.share.LocalMainViewModel
 import li.songe.gkd.ui.style.ProfileTransitions
 import li.songe.gkd.util.AndroidTarget
-import li.songe.gkd.util.coilCacheDir
+import li.songe.gkd.a11y.util.coilCacheDir
 import li.songe.gkd.util.throttle
 import okhttp3.OkHttpClient
 import okio.Path.Companion.toOkioPath

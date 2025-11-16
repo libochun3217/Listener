@@ -39,7 +39,7 @@ import li.songe.gkd.ui.style.cardHorizontalPadding
 import li.songe.gkd.ui.style.itemHorizontalPadding
 import li.songe.gkd.ui.style.surfaceCardColors
 import li.songe.gkd.util.launchAsFn
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.toast
 
 @Destination<RootGraph>(style = ProfileTransitions::class)
 @Composable

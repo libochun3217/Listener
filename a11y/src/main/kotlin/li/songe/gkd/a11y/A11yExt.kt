@@ -1,51 +1,9 @@
 package li.songe.gkd.a11y
 
-import android.accessibilityservice.AccessibilityService
-import android.accessibilityservice.AccessibilityService.ScreenshotResult
-import android.accessibilityservice.AccessibilityService.TakeScreenshotCallback
-import android.content.ComponentName
-import android.database.ContentObserver
-import android.graphics.Bitmap
-import android.provider.Settings
-import android.view.Display
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import li.songe.gkd.app
-import li.songe.gkd.service.A11yService
-import li.songe.gkd.util.AndroidTarget
-import li.songe.gkd.util.OnSimpleLife
-import li.songe.gkd.util.mapState
 import kotlin.contracts.contract
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
-context(context: OnSimpleLife)
-fun useEnabledA11yServicesFlow(): StateFlow<Set<ComponentName>> {
-    val stateFlow = MutableStateFlow(app.getSecureA11yServices())
-    val contextObserver = object : ContentObserver(null) {
-        override fun onChange(selfChange: Boolean) {
-            stateFlow.value = app.getSecureA11yServices()
-        }
-    }
-    app.contentResolver.registerContentObserver(
-        Settings.Secure.getUriFor(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES),
-        false,
-        contextObserver
-    )
-    context.onDestroyed {
-        app.contentResolver.unregisterContentObserver(contextObserver)
-    }
-    return stateFlow
-}
-
-context(context: OnSimpleLife)
-fun useA11yServiceEnabledFlow(servicesFlow: StateFlow<Set<ComponentName>> = useEnabledA11yServicesFlow()): StateFlow<Boolean> {
-    return servicesFlow.mapState(context.scope) {
-        it.contains(A11yService.a11yCn)
-    }
-}
 
 const val STATE_CHANGED = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
 const val CONTENT_CHANGED = AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
@@ -96,20 +54,6 @@ fun AccessibilityNodeInfo.isExpired(expiryMillis: Long): Boolean {
     return (System.currentTimeMillis() - generatedTime) > expiryMillis
 }
 
-val AccessibilityNodeInfo.compatChecked: Boolean?
-    get() = if (AndroidTarget.BAKLAVA) {
-        when (checked) {
-            AccessibilityNodeInfo.CHECKED_STATE_TRUE -> true
-            AccessibilityNodeInfo.CHECKED_STATE_FALSE -> false
-            AccessibilityNodeInfo.CHECKED_STATE_PARTIAL -> null
-            else -> null
-        }
-    } else {
-        @Suppress("DEPRECATION")
-        isChecked
-    }
-
-
 private const val interestedEvents = STATE_CHANGED or CONTENT_CHANGED
 fun AccessibilityEvent?.isUseful(): Boolean {
     contract {
@@ -118,33 +62,6 @@ fun AccessibilityEvent?.isUseful(): Boolean {
     return (this != null && packageName != null && className != null && eventType and interestedEvents != 0)
 }
 
-
-suspend fun AccessibilityService.screenshot(): Bitmap? = suspendCoroutine {
-    if (AndroidTarget.R) {
-        val callback = object : TakeScreenshotCallback {
-            override fun onSuccess(screenshot: ScreenshotResult) {
-                try {
-                    it.resume(
-                        Bitmap.wrapHardwareBuffer(
-                            screenshot.hardwareBuffer, screenshot.colorSpace
-                        )
-                    )
-                } finally {
-                    screenshot.hardwareBuffer.close()
-                }
-            }
-
-            override fun onFailure(errorCode: Int) = it.resume(null)
-        }
-        takeScreenshot(
-            Display.DEFAULT_DISPLAY,
-            application.mainExecutor,
-            callback
-        )
-    } else {
-        it.resume(null)
-    }
-}
 
 data class A11yEvent(
     val type: Int,

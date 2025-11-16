@@ -47,7 +47,7 @@ import li.songe.gkd.ui.style.ProfileTransitions
 import li.songe.gkd.ui.style.iconTextSize
 import li.songe.gkd.ui.style.scaffoldPadding
 import li.songe.gkd.util.AndroidTarget
-import li.songe.gkd.util.client
+import li.songe.gkd.a11y.util.client
 import li.songe.gkd.util.copyText
 import li.songe.gkd.util.openUri
 import li.songe.gkd.util.throttle

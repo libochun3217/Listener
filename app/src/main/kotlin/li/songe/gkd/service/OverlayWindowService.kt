@@ -45,12 +45,12 @@ import li.songe.gkd.ui.icon.DragPan
 import li.songe.gkd.ui.style.AppTheme
 import li.songe.gkd.ui.style.iconTextSize
 import li.songe.gkd.util.BarUtils
-import li.songe.gkd.util.OnSimpleLife
+import li.songe.gkd.a11y.util.OnSimpleLife
 import li.songe.gkd.util.ScreenUtils
 import li.songe.gkd.util.mapState
 import li.songe.gkd.util.px
 import li.songe.gkd.util.throttle
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.toast
 
 private var tempShareContext: ShareContext? = null
 private fun OverlayWindowService.useShareContext(): ShareContext {

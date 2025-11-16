@@ -7,7 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.content.ContextCompat
 import li.songe.gkd.META
-import li.songe.gkd.util.OnSimpleLife
+import li.songe.gkd.a11y.util.OnSimpleLife
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 

@@ -10,8 +10,7 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.migration.AutoMigrationSpec
 import kotlinx.coroutines.flow.Flow
-import li.songe.gkd.util.format
-import li.songe.gkd.util.getShowActivityId
+import li.songe.gkd.a11y.util.format
 
 @Entity(
     tableName = "activity_log_v2",
@@ -24,7 +23,7 @@ data class ActivityLog(
     @ColumnInfo(name = "app_id") val appId: String,
     @ColumnInfo(name = "activity_id") val activityId: String? = null,
 ) {
-    val showActivityId by lazy { getShowActivityId(appId, activityId) }
+    val showActivityId by lazy { "getShowActivityId(appId, activityId)" }
     val date by lazy { ctime.format("HH:mm:ss SSS") }
 
     @Dao

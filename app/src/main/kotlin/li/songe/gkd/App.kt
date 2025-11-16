@@ -9,7 +9,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.PowerManager
 import android.provider.Settings
@@ -26,8 +25,7 @@ import li.songe.gkd.store.initStore
 import li.songe.gkd.util.SafeR
 import li.songe.gkd.util.initSubsState
 import li.songe.gkd.util.initToast
-import li.songe.gkd.util.toJson5String
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.toast
 
 
 val appScope by lazy { MainScope() }
@@ -147,10 +145,6 @@ class App : Application() {
             saveDays = 7
             isLog2FileSwitch = true
         }
-        LogUtils.d(
-            "META",
-            toJson5String(META),
-        )
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
             toast(e.message ?: e.toString())
             LogUtils.d("UncaughtExceptionHandler", t, e)

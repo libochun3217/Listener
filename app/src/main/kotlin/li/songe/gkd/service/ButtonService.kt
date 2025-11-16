@@ -14,7 +14,7 @@ import li.songe.gkd.notif.buttonNotif
 import li.songe.gkd.permission.canDrawOverlaysState
 import li.songe.gkd.ui.component.PerfIcon
 import li.songe.gkd.util.SnapshotExt
-import li.songe.gkd.util.launchTry
+import li.songe.gkd.a11y.util.launchTry
 import li.songe.gkd.util.startForegroundServiceByClass
 import li.songe.gkd.util.stopServiceByClass
 

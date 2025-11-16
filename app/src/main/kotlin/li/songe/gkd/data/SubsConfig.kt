@@ -12,8 +12,8 @@ import androidx.room.Transaction
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
-import li.songe.gkd.util.isValidActivityId
-import li.songe.gkd.util.isValidAppId
+import li.songe.gkd.a11y.util.isValidActivityId
+import li.songe.gkd.a11y.util.isValidAppId
 
 
 private var lastId = 0L

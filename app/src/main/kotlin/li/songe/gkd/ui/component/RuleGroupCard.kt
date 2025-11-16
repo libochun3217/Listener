@@ -46,7 +46,7 @@ import li.songe.gkd.ui.share.LocalMainViewModel
 import li.songe.gkd.util.getGroupEnable
 import li.songe.gkd.util.launchAsFn
 import li.songe.gkd.util.throttle
-import li.songe.gkd.util.toast
+import li.songe.gkd.a11y.util.toast
 import java.util.Objects
 
 

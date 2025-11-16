@@ -1,14 +1,11 @@
 package li.songe.gkd.a11y
 
 import android.util.Log
-import android.view.View
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import com.blankj.utilcode.util.LogUtils
 import li.songe.gkd.service.A11yService
-import li.songe.gkd.util.appListenerFile
-import li.songe.gkd.util.appendTime
-import java.lang.Exception
+import li.songe.gkd.a11y.util.appListenerFile
+import li.songe.gkd.a11y.util.appendTime
 
 object Listener {
     private val TAG = "Listener"

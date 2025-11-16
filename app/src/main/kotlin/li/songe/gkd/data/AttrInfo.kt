@@ -3,7 +3,6 @@ package li.songe.gkd.data
 import android.graphics.Rect
 import android.view.accessibility.AccessibilityNodeInfo
 import kotlinx.serialization.Serializable
-import li.songe.gkd.a11y.compatChecked
 
 @Serializable
 data class AttrInfo(
@@ -64,7 +63,7 @@ data class AttrInfo(
                 clickable = node.isClickable,
                 focusable = node.isFocusable,
                 checkable = node.isCheckable,
-                checked = node.compatChecked,
+                checked = true,
                 editable = node.isEditable,
                 longClickable = node.isLongClickable,
                 visibleToUser = node.isVisibleToUser,

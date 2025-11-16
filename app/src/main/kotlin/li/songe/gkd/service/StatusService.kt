@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import li.songe.gkd.META
 import li.songe.gkd.MainActivity
-import li.songe.gkd.a11y.useA11yServiceEnabledFlow
 import li.songe.gkd.app
 import li.songe.gkd.notif.abNotif
 import li.songe.gkd.permission.foregroundServiceSpecialUseState
@@ -22,10 +21,8 @@ import li.songe.gkd.permission.shizukuGrantedState
 import li.songe.gkd.permission.writeSecureSettingsState
 import li.songe.gkd.store.actionCountFlow
 import li.songe.gkd.store.storeFlow
-import li.songe.gkd.util.OnSimpleLife
+import li.songe.gkd.a11y.util.OnSimpleLife
 import li.songe.gkd.util.RuleSummary
-import li.songe.gkd.util.getSubsStatus
-import li.songe.gkd.util.ruleSummaryFlow
 import li.songe.gkd.util.startForegroundServiceByClass
 import li.songe.gkd.util.stopServiceByClass
 
@@ -43,7 +40,6 @@ class StatusService : Service(), OnSimpleLife {
         !a && b
     }.stateIn(scope, SharingStarted.Eagerly, false)
 
-    val a11yServiceEnabledFlow = useA11yServiceEnabledFlow()
 
     fun statusTriple(): Triple<String, String, String?> {
         val abRunning = A11yService.isRunning.value
@@ -58,7 +54,7 @@ class StatusService : Service(), OnSimpleLife {
         return if (shizukuWarn) {
             Triple(title, "Shizuku 未连接，请授权或关闭优化", "gkd://page/1")
         } else if (!abRunning) {
-            val text = if (a11yServiceEnabledFlow.value) {
+            val text = if (false) {
                 "无障碍发生故障"
             } else if (writeSecureSettingsState.updateAndGet()) {
                 if (store.enableService && store.enableBlockA11yAppList && a11yPartDisabledFlow.value) {
@@ -89,7 +85,6 @@ class StatusService : Service(), OnSimpleLife {
                     A11yService.isRunning,
                     storeFlow,
                     shizukuWarnFlow,
-                    a11yServiceEnabledFlow,
                     writeSecureSettingsState.stateFlow,
                     topAppIdFlow,
                     actionCountFlow.debounce(1000L),

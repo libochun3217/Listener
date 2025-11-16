@@ -12,7 +12,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import li.songe.gkd.a11y.TopActivity
-import li.songe.gkd.a11y.screenshot
 import li.songe.gkd.a11y.topActivityFlow
 import li.songe.gkd.data.ComplexSnapshot
 import li.songe.gkd.data.RpcError
@@ -104,10 +103,6 @@ object SnapshotExt {
         }
     }
 
-    private suspend fun screenshot(): Bitmap? {
-        return A11yService.instance?.screenshot() ?: ScreenshotService.screenshot()
-    }
-
     private fun cropBitmapStatusBar(bitmap: Bitmap): Bitmap {
         val tempBp = bitmap.run {
             if (!isMutable || config == Bitmap.Config.HARDWARE) {
@@ -174,7 +169,7 @@ object SnapshotExt {
                     if (skipScreenshot) {
                         emptyScreenBitmap("跳过截图\n请自行替换")
                     } else {
-                        screenshot() ?: emptyScreenBitmap("无截图权限\n请自行替换")
+                        emptyScreenBitmap("无截图权限\n请自行替换")
                     }.let {
                         if (storeFlow.value.hideSnapshotStatusBar) {
                             cropBitmapStatusBar(it)
