@@ -84,7 +84,7 @@ import li.songe.gkd.util.mapState
 import li.songe.gkd.util.subsItemsFlow
 import li.songe.gkd.util.subsMapFlow
 import li.songe.gkd.util.throttle
-import li.songe.gkd.a11y.util.toast
+import li.songe.gkd.util.toast
 
 @Destination<RootGraph>(style = ProfileTransitions::class)
 @Composable

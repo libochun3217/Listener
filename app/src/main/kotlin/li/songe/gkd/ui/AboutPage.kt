@@ -83,15 +83,15 @@ import li.songe.gkd.util.ShortUrlSet
 import li.songe.gkd.util.UpdateChannelOption
 import li.songe.gkd.util.buildLogFile
 import li.songe.gkd.util.findOption
-import li.songe.gkd.a11y.util.format
+import li.songe.gkd.util.format
 import li.songe.gkd.util.launchAsFn
-import li.songe.gkd.a11y.util.launchTry
+import li.songe.gkd.util.launchTry
 import li.songe.gkd.util.openUri
 import li.songe.gkd.util.saveFileToDownloads
 import li.songe.gkd.util.shareFile
-import li.songe.gkd.a11y.util.sharedDir
+import li.songe.gkd.util.sharedDir
 import li.songe.gkd.util.throttle
-import li.songe.gkd.a11y.util.toast
+import li.songe.gkd.util.toast
 import java.io.File
 
 @Destination<RootGraph>(style = ProfileTransitions::class)

@@ -48,11 +48,11 @@ import li.songe.gkd.util.LOCAL_SUBS_ID
 import li.songe.gkd.util.checkSubsUpdate
 import li.songe.gkd.util.deleteSubscription
 import li.songe.gkd.util.launchAsFn
-import li.songe.gkd.a11y.util.launchTry
+import li.songe.gkd.util.launchTry
 import li.songe.gkd.util.subsItemsFlow
 import li.songe.gkd.util.subsMapFlow
 import li.songe.gkd.util.throttle
-import li.songe.gkd.a11y.util.toast
+import li.songe.gkd.util.toast
 import li.songe.gkd.util.updateSubsMutex
 
 @Composable

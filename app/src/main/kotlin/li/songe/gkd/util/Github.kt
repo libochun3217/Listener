@@ -35,7 +35,7 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
-import li.songe.gkd.a11y.util.GithubCookieException
+import li.songe.gkd.util.GithubCookieException
 import li.songe.gkd.data.GithubPoliciesAsset
 import li.songe.gkd.ui.component.PerfIcon
 import li.songe.gkd.ui.component.PerfIconButton

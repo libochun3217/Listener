@@ -7,9 +7,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import li.songe.gkd.a11y.util.OnA11yLife
-import li.songe.gkd.a11y.util.OnSimpleLife
-import li.songe.gkd.a11y.util.OnTileLife
+import li.songe.gkd.util.OnA11yLife
+import li.songe.gkd.util.OnSimpleLife
+import li.songe.gkd.util.OnTileLife
 import li.songe.gkd.isActivityVisible
 import java.util.WeakHashMap
 

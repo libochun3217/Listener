@@ -1,4 +1,4 @@
-package li.songe.gkd.a11y.util
+package li.songe.gkd.a11y.utils
 
 import android.graphics.drawable.Drawable
 import android.os.Handler

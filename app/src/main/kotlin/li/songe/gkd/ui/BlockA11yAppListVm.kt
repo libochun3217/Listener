@@ -8,7 +8,7 @@ import li.songe.gkd.store.blockA11yAppListFlow
 import li.songe.gkd.store.storeFlow
 import li.songe.gkd.ui.share.BaseViewModel
 import li.songe.gkd.ui.share.useAppFilter
-import li.songe.gkd.a11y.util.AppListString
+import li.songe.gkd.util.AppListString
 import li.songe.gkd.util.AppSortOption
 import li.songe.gkd.util.findOption
 

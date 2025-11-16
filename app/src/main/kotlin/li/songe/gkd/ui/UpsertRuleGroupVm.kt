@@ -11,7 +11,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import li.songe.gkd.data.RawSubscription
 import li.songe.gkd.ui.style.clearJson5TransformationCache
 import li.songe.gkd.util.subsMapFlow
-import li.songe.gkd.a11y.util.toast
+import li.songe.gkd.util.toast
 import li.songe.gkd.util.updateSubscription
 import li.songe.json5.Json5
 

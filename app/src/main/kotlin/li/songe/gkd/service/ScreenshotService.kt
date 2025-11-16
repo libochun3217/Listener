@@ -10,7 +10,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import li.songe.gkd.app
 import li.songe.gkd.notif.StopServiceReceiver
 import li.songe.gkd.notif.screenshotNotif
-import li.songe.gkd.a11y.util.OnSimpleLife
+import li.songe.gkd.util.OnSimpleLife
 import li.songe.gkd.util.ScreenshotUtil
 import li.songe.gkd.util.componentName
 import li.songe.gkd.util.stopServiceByClass

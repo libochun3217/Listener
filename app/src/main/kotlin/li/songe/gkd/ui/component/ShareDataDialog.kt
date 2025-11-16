@@ -18,7 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import li.songe.gkd.MainActivity
 import li.songe.gkd.data.exportData
-import li.songe.gkd.a11y.util.launchTry
+import li.songe.gkd.util.launchTry
 import li.songe.gkd.util.saveFileToDownloads
 import li.songe.gkd.util.shareFile
 import li.songe.gkd.util.throttle

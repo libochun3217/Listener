@@ -6,9 +6,9 @@ import kotlinx.coroutines.flow.update
 import li.songe.gkd.appScope
 import li.songe.gkd.service.ExposeService
 import li.songe.gkd.ui.gkdStartCommandText
-import li.songe.gkd.a11y.util.AppListString
-import li.songe.gkd.a11y.util.launchTry
-import li.songe.gkd.a11y.util.toast
+import li.songe.gkd.util.AppListString
+import li.songe.gkd.util.launchTry
+import li.songe.gkd.util.toast
 
 val storeFlow: MutableStateFlow<SettingsStore> by lazy {
     createAnyFlow(

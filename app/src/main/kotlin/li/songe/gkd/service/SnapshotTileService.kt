@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.isActive
 import li.songe.gkd.appScope
 import li.songe.gkd.util.SnapshotExt
-import li.songe.gkd.a11y.util.launchTry
-import li.songe.gkd.a11y.util.toast
+import li.songe.gkd.util.launchTry
+import li.songe.gkd.util.toast
 
 class SnapshotTileService() : BaseTileService() {
     override val activeFlow = MutableStateFlow(false)

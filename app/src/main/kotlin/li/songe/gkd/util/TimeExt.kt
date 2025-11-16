@@ -2,7 +2,7 @@ package li.songe.gkd.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import li.songe.gkd.a11y.util.ThrottleTimer
+import li.songe.gkd.util.ThrottleTimer
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit

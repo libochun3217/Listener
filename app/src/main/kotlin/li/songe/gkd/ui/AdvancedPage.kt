@@ -86,7 +86,7 @@ import li.songe.gkd.util.SafeR
 import li.songe.gkd.util.ShortUrlSet
 import li.songe.gkd.util.launchAsFn
 import li.songe.gkd.util.throttle
-import li.songe.gkd.a11y.util.toast
+import li.songe.gkd.util.toast
 
 @Destination<RootGraph>(style = ProfileTransitions::class)
 @Composable

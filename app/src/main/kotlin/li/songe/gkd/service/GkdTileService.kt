@@ -20,9 +20,9 @@ import li.songe.gkd.isActivityVisible
 import li.songe.gkd.permission.writeSecureSettingsState
 import li.songe.gkd.store.actualBlockA11yAppList
 import li.songe.gkd.store.storeFlow
-import li.songe.gkd.a11y.util.launchTry
+import li.songe.gkd.util.launchTry
 import li.songe.gkd.util.mapState
-import li.songe.gkd.a11y.util.toast
+import li.songe.gkd.util.toast
 
 class GkdTileService : BaseTileService() {
     override val activeFlow = A11yService.isRunning

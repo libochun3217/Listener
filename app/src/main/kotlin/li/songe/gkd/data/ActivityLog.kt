@@ -10,7 +10,7 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.migration.AutoMigrationSpec
 import kotlinx.coroutines.flow.Flow
-import li.songe.gkd.a11y.util.format
+import li.songe.gkd.util.format
 
 @Entity(
     tableName = "activity_log_v2",

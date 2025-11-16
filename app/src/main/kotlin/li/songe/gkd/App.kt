@@ -25,7 +25,7 @@ import li.songe.gkd.store.initStore
 import li.songe.gkd.util.SafeR
 import li.songe.gkd.util.initSubsState
 import li.songe.gkd.util.initToast
-import li.songe.gkd.a11y.util.toast
+import li.songe.gkd.util.toast
 
 
 val appScope by lazy { MainScope() }

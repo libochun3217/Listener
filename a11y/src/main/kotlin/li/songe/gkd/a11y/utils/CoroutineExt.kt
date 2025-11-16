@@ -1,4 +1,4 @@
-package li.songe.gkd.a11y.util
+package li.songe.gkd.a11y.utils
 
 import com.blankj.utilcode.util.LogUtils
 import kotlinx.coroutines.CancellationException

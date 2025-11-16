@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import li.songe.gkd.a11y.isUseful
 import li.songe.gkd.a11y.onA11yFeatInit
 import li.songe.gkd.a11y.setGeneratedTime
-import li.songe.gkd.a11y.util.OnA11yLife
+import li.songe.gkd.a11y.utils.OnA11yLife
 
 @SuppressLint("AccessibilityPolicy")
 abstract class A11yService : AccessibilityService(), OnA11yLife {

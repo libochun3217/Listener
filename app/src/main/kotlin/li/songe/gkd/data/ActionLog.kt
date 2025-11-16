@@ -11,7 +11,7 @@ import androidx.room.Query
 import androidx.room.migration.AutoMigrationSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
-import li.songe.gkd.a11y.util.format
+import li.songe.gkd.util.format
 
 @Serializable
 @Entity(

@@ -19,8 +19,8 @@ import li.songe.gkd.data.CategoryConfig
 import li.songe.gkd.data.Snapshot
 import li.songe.gkd.data.SubsConfig
 import li.songe.gkd.data.SubsItem
-import li.songe.gkd.a11y.util.dbFolder
-import li.songe.gkd.a11y.util.json
+import li.songe.gkd.util.dbFolder
+import li.songe.gkd.util.json
 
 @Database(
     version = 14,

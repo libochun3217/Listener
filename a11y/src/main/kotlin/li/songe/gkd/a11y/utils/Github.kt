@@ -1,4 +1,4 @@
-package li.songe.gkd.a11y.util
+package li.songe.gkd.a11y.utils
 
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData

@@ -24,7 +24,7 @@ import li.songe.gkd.ui.style.ProfileTransitions
 import li.songe.gkd.ui.style.scaffoldPadding
 import li.songe.gkd.util.launchAsFn
 import li.songe.gkd.util.throttle
-import li.songe.gkd.a11y.util.toast
+import li.songe.gkd.util.toast
 
 @Destination<RootGraph>(style = ProfileTransitions::class)
 @Composable

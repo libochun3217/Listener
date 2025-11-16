@@ -27,7 +27,7 @@ import li.songe.gkd.store.actionCountFlow
 import li.songe.gkd.store.checkAppBlockMatch
 import li.songe.gkd.store.storeFlow
 import li.songe.gkd.util.RuleSummary
-import li.songe.gkd.a11y.util.launchTry
+import li.songe.gkd.util.launchTry
 import li.songe.gkd.util.systemUiAppId
 
 data class TopActivity(

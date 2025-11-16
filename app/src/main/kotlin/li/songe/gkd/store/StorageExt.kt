@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import li.songe.gkd.appScope
-import li.songe.gkd.a11y.util.json
-import li.songe.gkd.a11y.util.privateStoreFolder
-import li.songe.gkd.a11y.util.storeFolder
+import li.songe.gkd.util.json
+import li.songe.gkd.util.privateStoreFolder
+import li.songe.gkd.util.storeFolder
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption

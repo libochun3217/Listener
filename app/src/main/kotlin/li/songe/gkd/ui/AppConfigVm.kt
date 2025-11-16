@@ -17,7 +17,7 @@ import li.songe.gkd.ui.component.ShowGroupState
 import li.songe.gkd.ui.component.toGroupState
 import li.songe.gkd.ui.share.BaseViewModel
 import li.songe.gkd.util.RuleSortOption
-import li.songe.gkd.a11y.util.collator
+import li.songe.gkd.util.collator
 import li.songe.gkd.util.findOption
 import li.songe.gkd.util.subsItemsFlow
 import li.songe.gkd.util.usedSubsEntriesFlow

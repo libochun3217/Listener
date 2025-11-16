@@ -39,7 +39,7 @@ import li.songe.gkd.data.RawSubscription
 import li.songe.gkd.data.SubsItem
 import li.songe.gkd.ui.home.HomeVm
 import li.songe.gkd.ui.share.LocalMainViewModel
-import li.songe.gkd.a11y.util.formatTimeAgo
+import li.songe.gkd.util.formatTimeAgo
 import li.songe.gkd.util.mapState
 import li.songe.gkd.util.subsLoadErrorsFlow
 import li.songe.gkd.util.subsRefreshErrorsFlow

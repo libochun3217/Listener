@@ -17,7 +17,7 @@ import li.songe.gkd.MainActivity
 import li.songe.gkd.app
 import li.songe.gkd.ui.share.LocalMainViewModel
 import li.songe.gkd.util.AndroidTarget
-import li.songe.gkd.a11y.util.toast
+import li.songe.gkd.util.toast
 
 class PermissionState(
     val name: String,

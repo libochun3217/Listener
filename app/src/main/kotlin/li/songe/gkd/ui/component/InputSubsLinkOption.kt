@@ -20,7 +20,7 @@ import li.songe.gkd.ui.share.LocalMainViewModel
 import li.songe.gkd.util.ShortUrlSet
 import li.songe.gkd.util.subsItemsFlow
 import li.songe.gkd.util.throttle
-import li.songe.gkd.a11y.util.toast
+import li.songe.gkd.util.toast
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine

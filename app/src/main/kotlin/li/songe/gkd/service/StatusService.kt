@@ -21,7 +21,7 @@ import li.songe.gkd.permission.shizukuGrantedState
 import li.songe.gkd.permission.writeSecureSettingsState
 import li.songe.gkd.store.actionCountFlow
 import li.songe.gkd.store.storeFlow
-import li.songe.gkd.a11y.util.OnSimpleLife
+import li.songe.gkd.util.OnSimpleLife
 import li.songe.gkd.util.RuleSummary
 import li.songe.gkd.util.startForegroundServiceByClass
 import li.songe.gkd.util.stopServiceByClass

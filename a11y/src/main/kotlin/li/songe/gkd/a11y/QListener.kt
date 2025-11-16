@@ -3,8 +3,8 @@ package li.songe.gkd.a11y
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import li.songe.gkd.a11y.util.appListenerFile
-import li.songe.gkd.a11y.util.appendTime
+import li.songe.gkd.a11y.utils.appListenerFile
+import li.songe.gkd.a11y.utils.appendTime
 import java.lang.Exception
 
 object QListener {

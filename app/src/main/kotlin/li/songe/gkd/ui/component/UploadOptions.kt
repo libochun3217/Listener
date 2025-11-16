@@ -15,10 +15,10 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import li.songe.gkd.MainViewModel
 import li.songe.gkd.data.GithubPoliciesAsset
-import li.songe.gkd.a11y.util.GithubCookieException
+import li.songe.gkd.util.GithubCookieException
 import li.songe.gkd.util.LoadStatus
-import li.songe.gkd.a11y.util.launchTry
-import li.songe.gkd.a11y.util.toast
+import li.songe.gkd.util.launchTry
+import li.songe.gkd.util.toast
 import li.songe.gkd.util.uploadFileToGithub
 import java.io.File
 
